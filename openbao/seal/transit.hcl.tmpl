@@ -1,0 +1,17 @@
+# Transit auto-unseal - cloud-agnostic, depends only on another VM
+# running its own OpenBao/Vault instance with the Transit engine enabled.
+# Only rendered when openbao_seal_mode = "transit". See ../README.md.
+#
+# Field names below match the documented shape of Vault/OpenBao's
+# "transit" seal stanza (address/token/key_name/mount_path) - unlike the
+# gcpckms stanza, this specific one has not been run against a real
+# server in this project yet. Verify the exact field list against
+# https://openbao.org/docs/configuration/seal/ (or the transit-specific
+# seal page under it) before relying on this in production.
+
+seal "transit" {
+  address    = "${unsealer_address}"
+  token      = "${unsealer_token}"
+  key_name   = "${unsealer_key_name}"
+  mount_path = "${unsealer_mount_path}"
+}

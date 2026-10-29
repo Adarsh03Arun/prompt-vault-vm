@@ -1,0 +1,44 @@
+name: xelerait-iam
+
+# Shared IAM on this VM. Other products log in here, not only Prompt Vault.
+# OpenBao + unsealer live in ../openbao/.
+
+services:
+  keycloak-db:
+    image: postgres:16-alpine
+    container_name: xelerait-keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME:-keycloak}
+      POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?set KEYCLOAK_DB_PASSWORD in .env}
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${KEYCLOAK_DB_HOST_PORT:-5432}:5432"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: xelerait-keycloak
+    restart: unless-stopped
+    depends_on:
+      - keycloak-db
+    command: start --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME:-keycloak}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER:-keycloak}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?set KEYCLOAK_DB_PASSWORD in .env}
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: ${KEYCLOAK_HOSTNAME:-localhost}
+      KC_HOSTNAME_STRICT: "false"
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-kc-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD in .env}
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    ports:
+      - "${KEYCLOAK_HOST_PORT:-8080}:8080"
+
+volumes:
+  keycloak-db-data:

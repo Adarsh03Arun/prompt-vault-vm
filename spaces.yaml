@@ -1,0 +1,17 @@
+# The only place "which spaces exist" is declared for this infra. Agents are
+# deliberately NOT listed here - per the generalized-roster decision in
+# docs/design/prompt-vault-technical-design-keycloak-openbao.md §2.3, the
+# agent roster stays open, and infra provisions access at the space level
+# only. A new agent landing inside an existing space needs zero infra
+# changes - only a new KV v2 path written at runtime.
+#
+# Adding a space: add an entry here. That's the whole change - every policy,
+# Transit key, and role binding in this folder is generated from this list.
+
+spaces:
+  - name: kiosk-pod
+    description: Kiosk/pod-facing agents (e.g. nursing_assistant_agent)
+  - name: racc
+    description: Revenue/command-center agents (e.g. hospital_command_center_agent, revenue_leakage_agent)
+  - name: shared
+    description: Guardrails/Security-owned agents (e.g. safeguard_agent, prompt_builder_agent, output_judge_agent)

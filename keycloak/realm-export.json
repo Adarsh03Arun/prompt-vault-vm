@@ -1,0 +1,15 @@
+{
+  "realm": "tch",
+  "displayName": "TCH",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "groups": [
+    {
+      "name": "tch-users",
+      "path": "/tch-users"
+    }
+  ],
+  "defaultGroups": ["/tch-users"],
+  "clients": []
+}

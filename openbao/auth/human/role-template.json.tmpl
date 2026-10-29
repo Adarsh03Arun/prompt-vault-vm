@@ -1,0 +1,12 @@
+{
+  "role_type": "jwt",
+  "bound_audiences": ["__KEYCLOAK_CLIENT_ID__"],
+  "user_claim": "sub",
+  "bound_claims_type": "string",
+  "bound_claims": {
+    "vault_roles": "__KEYCLOAK_ROLE__"
+  },
+  "token_policies": ["__POLICY_NAME__"],
+  "token_ttl": "900",
+  "token_max_ttl": "3600"
+}

@@ -1,0 +1,10 @@
+# GCP Cloud KMS auto-unseal. Not the default - see ../README.md for why
+# (every piece of this is GCP-specific and non-portable). Only rendered
+# when openbao_seal_mode = "gcpckms".
+
+seal "gcpckms" {
+  project    = "${kms_project}"
+  region     = "${kms_region}"
+  key_ring   = "${kms_key_ring}"
+  crypto_key = "${kms_crypto_key}"
+}

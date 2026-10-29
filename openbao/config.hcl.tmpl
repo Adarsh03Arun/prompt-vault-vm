@@ -1,0 +1,39 @@
+# Canonical OpenBao server config template. Rendered by Terraform
+# (../terraform/openbao_vm.tf) via templatefile() and delivered to each VM
+# as instance metadata - see ../terraform/startup/openbao_startup.sh.
+#
+# Matches the hosting decision in
+# docs/design/openbao-architecture-and-integration.md §3.4: Raft
+# integrated storage. The seal (auto-unseal) mechanism is configurable -
+# see ./seal/README.md and openbao_seal_mode in ../terraform/variables.tf.
+# Defaults to manual (no seal stanza at all, i.e. no auto-unseal) per an
+# explicit org constraint on cloud-provider portability (2026-10-26).
+
+storage "raft" {
+  path    = "/var/lib/openbao/raft"
+  node_id = "${environment}-node"
+}
+
+${seal_stanza}
+
+listener "tcp" {
+  address       = "0.0.0.0:8200"
+  tls_disable   = false
+  tls_cert_file = "/etc/openbao/tls/server.crt"
+  tls_key_file  = "/etc/openbao/tls/server.key"
+}
+
+# Declarative, config-file-only, as of OpenBao 2.4+ - sys/audit/file (the
+# API) rejects audit-device creation outright now, confirmed against a
+# real server 2026-10-27 (see ../scripts/bootstrap_openbao.sh's comment
+# on why it no longer tries the API call).
+audit "file" "main" {
+  options {
+    file_path = "/var/log/openbao/audit.log"
+  }
+}
+
+# TODO: TLS material provisioning (cert issuance/rotation) is not yet wired
+# up here - see CONTEXT.md "What has NOT been done".
+api_addr     = "https://127.0.0.1:8200"
+cluster_addr = "https://127.0.0.1:8201"

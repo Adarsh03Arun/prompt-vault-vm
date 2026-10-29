@@ -1,0 +1,10 @@
+[Unit]
+Description=Rotate a Prompt Vault leaf cert via OpenBao's PKI engine
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=BAO_ADDR=__BAO_ADDR__
+Environment=BAO_CACERT=__BAO_CACERT__
+EnvironmentFile=__BAO_TOKEN_FILE__
+ExecStart=__ROOT__/rotate_leaf_cert.sh __MOUNT__ __ROLE__ __COMMON_NAME__ __OUTPUT_DIR__ __TTL__

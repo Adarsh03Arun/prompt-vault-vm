@@ -1,0 +1,48 @@
+name: prompt-vault
+
+# Prompt vault on this VM: OpenBao + Transit unsealer.
+# Keycloak is not here — it lives in ../keycloak/ (shared IAM).
+
+services:
+  openbao-unsealer:
+    image: openbao/openbao:2.4
+    container_name: prompt-vault-vm-openbao-unsealer
+    restart: unless-stopped
+    cap_add:
+      - IPC_LOCK
+    command: server
+    environment:
+      BAO_ADDR: https://127.0.0.1:8200
+      BAO_CACERT: /openbao/certs/ca.crt
+    volumes:
+      - openbao-unsealer-data:/openbao/file
+      - ./openbao-unsealer/config.hcl:/openbao/config/config.hcl:ro
+      - ./certs:/openbao/certs:ro
+    ports:
+      - "127.0.0.1:${UNSEALER_HOST_PORT:-8220}:8200"
+
+  openbao:
+    image: openbao/openbao:2.4
+    container_name: prompt-vault-vm-openbao
+    restart: unless-stopped
+    depends_on:
+      - openbao-unsealer
+    cap_add:
+      - IPC_LOCK
+    command: server
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      BAO_ADDR: https://127.0.0.1:8200
+      BAO_CACERT: /openbao/certs/ca.crt
+    volumes:
+      - openbao-data:/openbao/file
+      - ./config.hcl:/openbao/config/config.hcl:ro
+      - ./certs:/openbao/certs:ro
+      - ./logs:/openbao/logs
+    ports:
+      - "${OPENBAO_HOST_PORT:-8200}:8200"
+
+volumes:
+  openbao-unsealer-data:
+  openbao-data:

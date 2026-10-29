@@ -1,0 +1,16 @@
+{
+  "role_type": "jwt",
+  "user_claim": "sub",
+  "bound_audiences": ["__BOUND_AUDIENCE__"],
+  "bound_claims_type": "glob",
+  "bound_claims": {
+    "repository": "__GITHUB_REPOSITORY__",
+    "environment": "prod",
+    "event_name": "push",
+    "job_workflow_ref": "__GITHUB_REPOSITORY__/.github/workflows/publish-prompts.yaml@*"
+  },
+  "token_policies": ["gitops-secret-id-mint"],
+  "token_ttl": "120",
+  "token_max_ttl": "120",
+  "token_num_uses": 1
+}

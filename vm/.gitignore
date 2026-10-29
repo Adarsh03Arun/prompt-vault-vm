@@ -1,0 +1,7 @@
+keycloak/.env
+keycloak/realm-export.json
+openbao/.env
+openbao/certs/
+openbao/secrets/
+openbao/logs/
+openbao/config.hcl

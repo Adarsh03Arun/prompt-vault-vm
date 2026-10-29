@@ -1,0 +1,32 @@
+# Main prompt-vault OpenBao. run.sh substitutes __UNSEALER_TOKEN__ and
+# __OPENBAO_API_ADDR__. Do not commit config.hcl.
+
+storage "raft" {
+  path    = "/openbao/file"
+  node_id = "prompt-vault-node"
+}
+
+seal "transit" {
+  address     = "https://openbao-unsealer:8200"
+  token       = "__UNSEALER_TOKEN__"
+  key_name    = "prompt-vault-unseal"
+  mount_path  = "transit/"
+  tls_ca_cert = "/openbao/certs/ca.crt"
+}
+
+listener "tcp" {
+  address       = "0.0.0.0:8200"
+  tls_cert_file = "/openbao/certs/openbao.crt"
+  tls_key_file  = "/openbao/certs/openbao.key"
+}
+
+audit "file" "main" {
+  options {
+    file_path = "/openbao/logs/audit.log"
+  }
+}
+
+api_addr     = "__OPENBAO_API_ADDR__"
+cluster_addr = "https://openbao:8201"
+
+ui = true
