@@ -37,6 +37,8 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD in .env}
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      # XelerAIT Keycloakify login theme
+      - ./providers:/opt/keycloak/providers:ro
     ports:
       - "${KEYCLOAK_HOST_PORT:-8080}:8080"
 

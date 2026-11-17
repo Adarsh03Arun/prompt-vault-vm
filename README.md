@@ -28,5 +28,7 @@ cp -a ~/tch/vm/openbao ~/openbao
 cp -a ~/tch/scripts ~/openbao/scripts
 ```
 
+The Keycloak tree includes `providers/xelerait-keycloak-theme-26.jar` (login theme **`xelerait`**).
+
 Bring-up: `~/keycloak` first, then `~/openbao`. Details in `vm/README.md`.
 Do not commit `.env` or `secrets/`.

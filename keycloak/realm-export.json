@@ -3,6 +3,7 @@
   "displayName": "TCH",
   "enabled": true,
   "sslRequired": "external",
+  "loginTheme": "xelerait",
   "registrationAllowed": true,
   "groups": [
     {
