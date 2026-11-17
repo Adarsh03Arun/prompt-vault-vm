@@ -32,3 +32,6 @@ The Keycloak tree includes `providers/xelerait-keycloak-theme-26.jar` (login the
 
 Bring-up: `~/keycloak` first, then `~/openbao`. Details in `vm/README.md`.
 Do not commit `.env` or `secrets/`.
+
+**Keycloak quirks / ops notes** (themes, realm logo API, gotchas):  
+[`keycloak/keycloak-ops-notes.md`](keycloak/keycloak-ops-notes.md)
