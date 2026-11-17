@@ -192,6 +192,7 @@ local-forward for DBeaver; do not open 5432 publicly.
 | 2026-11-17 | Co-brand = hospital `loginLogoUrl` + always-on XelerAIT logo; realm from URL, not from user |
 | 2026-11-17 | `realm-export.json` `loginTheme` only on first import |
 | 2026-11-17 | Hospital product: personas in KC, permissions in org DB + sync scripts |
+| 2026-11-17 | Login “HTTPS required” on HTTP IP: realm `sslRequired` was `external`; use `none` on HTTP-dev VMs |
 
 ---
 

@@ -94,7 +94,7 @@ def main() -> None:
             "realm": realm,
             "displayName": display,
             "enabled": True,
-            "sslRequired": "external",
+            "sslRequired": env.get("SSL_REQUIRED", "none"),
             "registrationAllowed": False,
             "loginTheme": theme,
             "attributes": {"loginLogoUrl": logo} if logo else {},

@@ -41,25 +41,30 @@ echo "==> Realm ${REALM}"
 if curl -sf "${auth[@]}" "${KC_URL}/admin/realms/${REALM}" >/dev/null 2>&1; then
   echo "    exists — updating displayName / theme / logo"
   curl -sf "${auth[@]}" "${KC_URL}/admin/realms/${REALM}" > /tmp/realm.json
-  jq --arg dn "$HOSPITAL_DISPLAY_NAME" --arg theme "$LOGIN_THEME" --arg logo "${LOGIN_LOGO_URL:-}" '
+  SSL_REQUIRED="${SSL_REQUIRED:-none}"
+  jq --arg dn "$HOSPITAL_DISPLAY_NAME" --arg theme "$LOGIN_THEME" --arg logo "${LOGIN_LOGO_URL:-}" --arg ssl "$SSL_REQUIRED" '
     .displayName = $dn
     | .loginTheme = $theme
+    | .sslRequired = $ssl
     | .attributes = (.attributes // {})
     | if $logo != "" then .attributes.loginLogoUrl = $logo else . end
   ' /tmp/realm.json > /tmp/realm2.json
   curl -sf -X PUT "${auth[@]}" "${KC_URL}/admin/realms/${REALM}" -d @/tmp/realm2.json
 else
   echo "    creating"
+  # sslRequired=none for HTTP-dev VMs (KC_HTTP_ENABLED). Use external/all in prod HTTPS.
+  SSL_REQUIRED="${SSL_REQUIRED:-none}"
   jq -n \
     --arg realm "$REALM" \
     --arg dn "$HOSPITAL_DISPLAY_NAME" \
     --arg theme "$LOGIN_THEME" \
     --arg logo "${LOGIN_LOGO_URL:-}" \
+    --arg ssl "$SSL_REQUIRED" \
     '{
       realm: $realm,
       displayName: $dn,
       enabled: true,
-      sslRequired: "external",
+      sslRequired: $ssl,
       registrationAllowed: false,
       loginTheme: $theme,
       attributes: (if $logo != "" then {loginLogoUrl: $logo} else {} end)
