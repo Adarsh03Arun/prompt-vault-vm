@@ -10,6 +10,21 @@
 
 Same persona pack for every hospital (`personas.json`).
 
+## Test: create realm `hospital-A`
+
+From a machine that can reach Keycloak (or on the VM):
+
+```bash
+# edit KC_ADMIN_PASSWORD first
+cp keycloak/hospital-onboarding/hospital-A.env hospital-A.local.env
+# set password + KC_URL
+
+python3 scripts/test_onboard_hospital_A.py ./hospital-A.local.env
+# or: ./scripts/test-onboard-hospital-A.sh ./hospital-A.local.env   # needs jq
+```
+
+Preview: `http://<KC_HOST>:8080/realms/hospital-A/account/`
+
 ## Steps
 
 1. Copy env:
