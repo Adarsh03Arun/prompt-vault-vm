@@ -35,3 +35,6 @@ Do not commit `.env` or `secrets/`.
 
 **Keycloak quirks / ops notes** (themes, realm logo API, gotchas):  
 [`keycloak/keycloak-ops-notes.md`](keycloak/keycloak-ops-notes.md)
+
+**Hospital onboard** (personas in KC, matrix in org DB, sync):  
+[`keycloak/hospital-onboarding/README.md`](keycloak/hospital-onboarding/README.md)

@@ -148,21 +148,22 @@ JAR) named after the realm. Prefer `loginLogoUrl` when possible.
 
 ---
 
-## 4. Permissions matrix vs Keycloak (RACC)
+## 4. Personas vs permissions (locked 2026-11-17)
 
-UI modules (Dashboard, Claims, Documents, …) with levels
-Full / Edit / Assigned / View / None:
-
-| Layer | Keycloak modeling |
+| Concern | System of record |
 |---|---|
-| Module | Optional **composite** client role (packaging only) |
-| Level | **Atomic** client roles, e.g. `claims:assigned`, `documents:edit` |
-| No access | No role for that module |
-| Assigned | Flag in token; **row filter** (dept/branch) enforced in app/DB |
+| **Persona** (Doctor, Nurse, …) | **Keycloak** — client roles `persona-*` on `racc` (hospital IT) |
+| **Permission matrix** | **Org DB** — same template every hospital |
+| Sync | KC → org DB for user↔persona; matrix never written from KC |
 
-Authorize APIs on **atomics**. One level per module (replace, don’t stack).
-Current product decision: matrix may stay in **Postgres**; if moved into
-Keycloak, use client roles on client `racc` as above — not realm roles.
+Same persona pack every hospital. Onboard + sync:
+
+- `keycloak/hospital-onboarding/` (decision, `personas.json`, `.env.example`)
+- `scripts/onboard-hospital.sh`
+- `scripts/sync-kc-personas-to-orgdb.sh`
+
+Matrix UI levels (Full / Edit / Assigned / View / None) stay in **org DB**
+only. Do not duplicate those as Keycloak roles unless you change this decision.
 
 ---
 
@@ -190,6 +191,7 @@ local-forward for DBeaver; do not open 5432 publicly.
 | 2026-11-17 | Stock KC 26: no Realm attributes UI; User profile Attributes ≠ realm branding |
 | 2026-11-17 | Co-brand = hospital `loginLogoUrl` + always-on XelerAIT logo; realm from URL, not from user |
 | 2026-11-17 | `realm-export.json` `loginTheme` only on first import |
+| 2026-11-17 | Hospital product: personas in KC, permissions in org DB + sync scripts |
 
 ---
 

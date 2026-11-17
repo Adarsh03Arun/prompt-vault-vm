@@ -1,0 +1,19 @@
+{
+  "clientId": "racc",
+  "personas": [
+    { "key": "nurse", "label": "Nurse", "category": "staff" },
+    { "key": "doctor", "label": "Doctor", "category": "staff" },
+    { "key": "lab", "label": "Lab", "category": "staff" },
+    { "key": "radiology", "label": "Radiology", "category": "staff" },
+    { "key": "ot", "label": "OT", "category": "staff" },
+    { "key": "pharmacy", "label": "Pharmacy", "category": "staff" },
+    { "key": "billing-counter", "label": "Billing Counter", "category": "staff" },
+    { "key": "medical-records", "label": "Medical Records", "category": "staff" },
+    { "key": "insurance-claims-manager", "label": "Insurance & Claims Manager", "category": "staff" },
+    { "key": "ceo", "label": "CEO", "category": "management" },
+    { "key": "cfo", "label": "CFO", "category": "management" },
+    { "key": "coo", "label": "COO", "category": "management" },
+    { "key": "hospital-it-admin", "label": "Hospital IT Admin", "category": "management" }
+  ],
+  "comment": "Client role name on racc = persona-<key>. Same pack for every hospital realm."
+}
