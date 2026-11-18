@@ -374,7 +374,7 @@
       <div class="brand">
         <div class="brand-name">XelerAIT</div>
         <div class="brand-sep" aria-hidden="true"></div>
-        <div class="brand-screen">Audit</div>
+        <div class="brand-screen">POD &amp; version audit</div>
       </div>
       <div class="top-actions">
         <span class="auth-note" id="authNote">Demo data · Keycloak later</span>
@@ -391,19 +391,19 @@
         <div class="stat deny"><strong id="statDenied">—</strong><span>denied</span></div>
       </div>
       <div class="controls">
-        <input class="search" id="search" type="search" placeholder="Search who, action, or path…" autocomplete="off" />
+        <input class="search" id="search" type="search" placeholder="Search agent, change, version…" autocomplete="off" />
         <select class="select" id="resultFilter" aria-label="Result filter">
           <option value="">All results</option>
           <option value="allowed">Allowed</option>
           <option value="denied">Denied</option>
         </select>
         <div class="views" role="tablist" aria-label="Audit views">
-          <button type="button" class="chip active" data-view="activity" role="tab" aria-selected="true">Activity</button>
-          <button type="button" class="chip" data-view="publishes" role="tab">Publishes</button>
-          <button type="button" class="chip" data-view="certs" role="tab">Certificates</button>
-          <button type="button" class="chip" data-view="agents" role="tab">Agent reads</button>
-          <button type="button" class="chip" data-view="admin" role="tab">Admin</button>
-          <button type="button" class="chip" data-view="failures" role="tab">Failures</button>
+          <button type="button" class="chip active" data-view="pod" role="tab" aria-selected="true">POD changes</button>
+          <button type="button" class="chip" data-view="versions" role="tab">Versions</button>
+          <button type="button" class="chip" data-view="deprecations" role="tab">Deprecations</button>
+          <button type="button" class="chip" data-view="publishes" role="tab">Publish runs</button>
+          <button type="button" class="chip" data-view="failures" role="tab">Blocked</button>
+          <button type="button" class="chip" data-view="activity" role="tab">All</button>
         </div>
         <button type="button" class="btn btn-light" id="btnExport">Export</button>
       </div>
@@ -416,14 +416,15 @@
           <thead>
             <tr>
               <th>Time</th>
+              <th>Agent</th>
+              <th>Change</th>
+              <th>Ver</th>
               <th>Who</th>
-              <th>Action</th>
-              <th>Target</th>
               <th>Result</th>
             </tr>
           </thead>
           <tbody id="tbody">
-            <tr><td class="empty" colspan="5">Connect to the audit API to load events.</td></tr>
+            <tr><td class="empty" colspan="6">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -463,16 +464,16 @@
   <script>
     const STORAGE_KEY = "xelerait.audit.connection";
     const VIEWS = {
-      activity: { path: "/api/audit/events", label: "Activity", demoKey: "activity" },
-      publishes: { path: "/api/logs/publish-runs", label: "Publishes", listOnly: true, demoKey: "publishes" },
-      certs: { path: "/api/logs/cert-renewals", label: "Certificates", demoKey: "certs" },
-      agents: { path: "/api/logs/agent-reads", label: "Agent reads", demoKey: "agents" },
-      admin: { path: "/api/logs/human-admin", label: "Admin", demoKey: "admin" },
-      failures: { path: "/api/logs/auth-failures", label: "Failures", demoKey: "failures" },
+      pod: { path: "/api/audit/events", label: "POD changes", demoKey: "pod", liveParams: { space: "pod" } },
+      versions: { path: "/api/audit/events", label: "Versions", demoKey: "versions", liveParams: { space: "pod", path_prefix: "secret/data/prompts/tch/pod" } },
+      deprecations: { path: "/api/audit/events", label: "Deprecations", demoKey: "deprecations", liveParams: { space: "pod", result: "denied" } },
+      publishes: { path: "/api/logs/publish-runs", label: "Publish runs", listOnly: true, demoKey: "publishes" },
+      failures: { path: "/api/logs/auth-failures", label: "Blocked", demoKey: "failures" },
+      activity: { path: "/api/audit/events", label: "All", demoKey: "activity" },
     };
 
     const state = {
-      view: "activity",
+      view: "pod",
       items: [],
       selectedId: null,
       detail: null,
@@ -582,13 +583,28 @@
       }
     }
 
+    function changeLabel(e) {
+      if (e.change) return e.change;
+      if (e.category === "version.publish") return "Published version";
+      if (e.category === "version.deprecate") return "Deprecated version";
+      if (e.category === "version.destroy") return "Destroyed version";
+      if (e.category === "version.rollback") return "Rolled back";
+      if (e.category === "version.status") return "Status / live pointer";
+      if (e.category === "agent.soft_delete") return "Soft-deleted agent";
+      if (e.category === "prompt.read") return e.result === "denied" ? "Read blocked" : "Prompt read";
+      return e.action || e.category || "—";
+    }
+
     function normalizeItems(view, data) {
       if (view === "publishes") {
         return (data.items || []).map((r) => ({
           id: r.run_id,
           time: r.started_at || r.ended_at || "",
           who: r.actor || "gitops",
+          agent: (r.agents || []).join(", ") || "—",
           action: "publish",
+          change: r.summary || ("Publish " + ((r.agents || []).join(", ") || "run")),
+          version: "—",
           target: (r.agents || []).join(", ") || "publish run",
           result: "allowed",
           _raw: r,
@@ -599,7 +615,10 @@
         id: e.id,
         time: e.time,
         who: e.who || "unknown",
+        agent: e.agent && e.agent !== "—" ? e.agent : (e.target || "").split("/").pop() || "—",
         action: e.action || e.category || "—",
+        change: changeLabel(e),
+        version: e.version != null ? "v" + e.version : "—",
         target: e.target || "—",
         result: e.result || "—",
         _raw: e,
@@ -612,7 +631,7 @@
       return state.items.filter((row) => {
         if (result && row.result !== result) return false;
         if (!q) return true;
-        const blob = [row.who, row.action, row.target, row.id].join(" ").toLowerCase();
+        const blob = [row.who, row.agent, row.change, row.action, row.target, row.version, row.id].join(" ").toLowerCase();
         return blob.includes(q);
       });
     }
@@ -620,15 +639,16 @@
     function renderTable() {
       const rows = filteredRows();
       if (!rows.length) {
-        el.tbody.innerHTML = `<tr><td class="empty" colspan="5">No events match this view or filter.</td></tr>`;
+        el.tbody.innerHTML = `<tr><td class="empty" colspan="6">No POD / version events match this view or filter.</td></tr>`;
         return;
       }
       el.tbody.innerHTML = rows.map((r) => `
         <tr data-id="${escapeAttr(r.id)}" class="${r.id === state.selectedId ? "selected" : ""}">
           <td class="mono muted">${escapeHtml(fmtTime(r.time))}</td>
-          <td class="who" title="${escapeAttr(r.who)}">${escapeHtml(r.who)}</td>
-          <td>${escapeHtml(r.action)}</td>
-          <td class="target" title="${escapeAttr(r.target)}">${escapeHtml(r.target)}</td>
+          <td class="who" title="${escapeAttr(r.agent)}">${escapeHtml(r.agent)}</td>
+          <td title="${escapeAttr(r.change)}">${escapeHtml(r.change)}</td>
+          <td class="mono">${escapeHtml(r.version)}</td>
+          <td class="muted" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeAttr(r.who)}">${escapeHtml(r.who)}</td>
           <td><span class="pill ${r.result === "denied" ? "deny" : "ok"}">${escapeHtml(r.result)}</span></td>
         </tr>
       `).join("");
@@ -643,6 +663,8 @@
       const fields = row._publish
         ? [
             ["Run ID", raw.run_id],
+            ["Space", raw.space || "pod"],
+            ["Summary", raw.summary || "—"],
             ["Started", fmtTime(raw.started_at)],
             ["Ended", fmtTime(raw.ended_at)],
             ["Actor", raw.actor],
@@ -651,12 +673,14 @@
           ]
         : [
             ["Time", fmtTime(raw.time)],
+            ["Space", raw.space || "—"],
+            ["Agent", raw.agent || "—"],
+            ["Change", raw.change || changeLabel(raw)],
+            ["Version", raw.version != null ? "v" + raw.version : "—"],
             ["Who", raw.who || "—"],
             ["Action", raw.action || "—"],
             ["Category", raw.category || "—"],
             ["Target", raw.target || "—"],
-            ["Space", raw.space || "—"],
-            ["Agent", raw.agent || "—"],
             ["Result", raw.result || "—"],
             ["Request ID", raw.request_id || "—"],
           ];
@@ -685,9 +709,9 @@
           if (!window.AUDIT_DEMO) throw new Error("Demo data failed to load.");
           data = window.AUDIT_DEMO[meta.demoKey] || { items: [] };
         } else {
-          const params = { limit: 100 };
+          const params = { limit: 100, ...(meta.liveParams || {}) };
           const result = el.resultFilter.value;
-          if (result && state.view === "activity") params.result = result;
+          if (result) params.result = result;
           const res = await api(meta.path, params);
           data = await res.json();
         }
