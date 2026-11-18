@@ -105,6 +105,24 @@ Leave this session open. Expect:
 Uvicorn running on http://127.0.0.1:8088
 ```
 
+## Audit UI
+
+With uvicorn running, open in a browser (SSH tunnel if needed):
+
+```text
+http://127.0.0.1:8088/ui/
+```
+
+Use **Connection** to set Base URL (`http://127.0.0.1:8088`) and `AUDIT_API_TOKEN`.  
+Same screen for everyone for now; Keycloak auth later.
+
+Laptop tunnel example:
+
+```bash
+gcloud compute ssh xel-openbao-keycloak-dev --zone ZONE --tunnel-through-iap --project xel-dev-platform -- -L 8088:127.0.0.1:8088
+# then open http://127.0.0.1:8088/ui/
+```
+
 ## Curl tests (second SSH session)
 
 ```bash

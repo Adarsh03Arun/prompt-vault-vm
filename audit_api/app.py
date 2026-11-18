@@ -8,10 +8,12 @@ L2–L6 stay on OpenBao / Admin UI.
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from .auth import build_auth_dependency
 from .config import Settings
@@ -22,6 +24,15 @@ app = FastAPI(
     version="0.1.0",
     description="Server-side audit/log query APIs for the internal dashboard (Python).",
 )
+
+_UI_DIR = Path(__file__).resolve().parent / "ui"
+if _UI_DIR.is_dir():
+    app.mount("/ui", StaticFiles(directory=str(_UI_DIR), html=True), name="ui")
+
+
+@app.get("/", include_in_schema=False)
+def root_to_ui() -> RedirectResponse:
+    return RedirectResponse(url="/ui/")
 
 
 @lru_cache(maxsize=1)
