@@ -1,0 +1,6 @@
+{"time":"2026-11-16T08:00:00.010Z","type":"response","auth":{"display_name":"demo-reader.agents.internal","entity_id":"e1"},"request":{"id":"r1","operation":"read","path":"secret/data/prompts/tch/demo/nursing_assistant_agent"}}
+{"time":"2026-11-16T08:01:00.000Z","type":"response","auth":{"display_name":"demo-reader.agents.internal"},"request":{"id":"r2","operation":"read","path":"secret/data/prompts/tch/racc/x"},"error":"permission denied"}
+{"time":"2026-11-16T08:02:00.000Z","type":"response","auth":{"display_name":"gitops-pipeline"},"request":{"id":"r3","operation":"update","path":"secret/data/prompts/tch/demo/safeguard_agent"}}
+{"time":"2026-11-16T08:02:05.000Z","type":"response","auth":{"display_name":"gitops-pipeline"},"request":{"id":"r4","operation":"update","path":"secret/data/agent-certs/tch/demo"}}
+{"time":"2026-11-16T08:03:00.000Z","type":"response","auth":{"display_name":"vault-admin@realm"},"request":{"id":"r5","operation":"update","path":"secret/metadata/prompts/tch/demo/output_judge_agent"}}
+{"time":"2026-11-16T08:04:00.000Z","type":"response","auth":{"display_name":"demo-reader.agents.internal"},"request":{"id":"r6","operation":"update","path":"auth/cert/login"}}
