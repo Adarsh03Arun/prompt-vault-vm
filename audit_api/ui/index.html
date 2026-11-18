@@ -377,7 +377,8 @@
         <div class="brand-screen">Audit</div>
       </div>
       <div class="top-actions">
-        <span class="auth-note" id="authNote">Sign-in via Keycloak later</span>
+        <span class="auth-note" id="authNote">Demo data · Keycloak later</span>
+        <button type="button" class="btn btn-ghost" id="btnDemo" title="Toggle synthetic data">Demo</button>
         <button type="button" class="btn btn-ghost" id="btnSettings">Connection</button>
         <button type="button" class="btn" id="btnRefresh">Refresh</button>
       </div>
@@ -438,7 +439,11 @@
   <div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="modal">
       <h3 id="settingsTitle">API connection</h3>
-      <p>Point at the audit service. Keycloak sign-in will replace the token field later.</p>
+      <p>Use demo data to preview the UI, or point at the live audit service. Keycloak replaces the token later.</p>
+      <div class="field" style="display:flex;align-items:center;gap:0.5rem">
+        <input id="useDemo" type="checkbox" checked />
+        <label for="useDemo" style="margin:0;font-weight:500">Use synthetic demo data</label>
+      </div>
       <div class="field">
         <label for="apiBase">Base URL</label>
         <input id="apiBase" placeholder="http://127.0.0.1:8088" />
@@ -454,15 +459,16 @@
     </div>
   </div>
 
+  <script src="./demo-data.js"></script>
   <script>
     const STORAGE_KEY = "xelerait.audit.connection";
     const VIEWS = {
-      activity: { path: "/api/audit/events", label: "Activity" },
-      publishes: { path: "/api/logs/publish-runs", label: "Publishes", listOnly: true },
-      certs: { path: "/api/logs/cert-renewals", label: "Certificates" },
-      agents: { path: "/api/logs/agent-reads", label: "Agent reads" },
-      admin: { path: "/api/logs/human-admin", label: "Admin" },
-      failures: { path: "/api/logs/auth-failures", label: "Failures" },
+      activity: { path: "/api/audit/events", label: "Activity", demoKey: "activity" },
+      publishes: { path: "/api/logs/publish-runs", label: "Publishes", listOnly: true, demoKey: "publishes" },
+      certs: { path: "/api/logs/cert-renewals", label: "Certificates", demoKey: "certs" },
+      agents: { path: "/api/logs/agent-reads", label: "Agent reads", demoKey: "agents" },
+      admin: { path: "/api/logs/human-admin", label: "Admin", demoKey: "admin" },
+      failures: { path: "/api/logs/auth-failures", label: "Failures", demoKey: "failures" },
     };
 
     const state = {
@@ -484,6 +490,9 @@
       modal: document.getElementById("settingsModal"),
       apiBase: document.getElementById("apiBase"),
       apiToken: document.getElementById("apiToken"),
+      useDemo: document.getElementById("useDemo"),
+      authNote: document.getElementById("authNote"),
+      btnDemo: document.getElementById("btnDemo"),
       statEvents: document.getElementById("statEvents"),
       statAllowed: document.getElementById("statAllowed"),
       statDenied: document.getElementById("statDenied"),
@@ -501,10 +510,22 @@
     }
     function conn() {
       const c = loadConn();
+      const demoDefault = c.demo === undefined ? true : !!c.demo;
       return {
         base: (c.base || "http://127.0.0.1:8088").replace(/\/$/, ""),
         token: c.token || "",
+        demo: demoDefault,
       };
+    }
+    function isDemo() {
+      return !!conn().demo;
+    }
+    function syncDemoChrome() {
+      const on = isDemo();
+      el.authNote.textContent = on ? "Synthetic demo data" : "Live API · Keycloak later";
+      el.btnDemo.classList.toggle("active", on);
+      el.btnDemo.style.background = on ? "rgba(107,192,72,0.22)" : "";
+      el.btnDemo.style.borderColor = on ? "rgba(107,192,72,0.55)" : "";
     }
 
     function setStatus(msg, isErr) {
@@ -543,9 +564,14 @@
 
     async function loadSummary() {
       try {
-        const res = await api("/api/audit/summary");
-        const data = await res.json();
-        const t = data.totals || {};
+        let t;
+        if (isDemo()) {
+          t = (window.AUDIT_DEMO && window.AUDIT_DEMO.summary.totals) || {};
+        } else {
+          const res = await api("/api/audit/summary");
+          const data = await res.json();
+          t = data.totals || {};
+        }
         el.statEvents.textContent = t.events ?? "—";
         el.statAllowed.textContent = t.allowed ?? "—";
         el.statDenied.textContent = t.denied ?? "—";
@@ -654,16 +680,22 @@
       const meta = VIEWS[state.view];
       setStatus("Loading " + meta.label.toLowerCase() + "…");
       try {
-        const params = { limit: 100 };
-        const result = el.resultFilter.value;
-        if (result && state.view === "activity") params.result = result;
-        const res = await api(meta.path, params);
-        const data = await res.json();
+        let data;
+        if (isDemo()) {
+          if (!window.AUDIT_DEMO) throw new Error("Demo data failed to load.");
+          data = window.AUDIT_DEMO[meta.demoKey] || { items: [] };
+        } else {
+          const params = { limit: 100 };
+          const result = el.resultFilter.value;
+          if (result && state.view === "activity") params.result = result;
+          const res = await api(meta.path, params);
+          data = await res.json();
+        }
         state.items = normalizeItems(state.view, data);
         hideDetail();
         renderTable();
         const n = filteredRows().length;
-        setStatus(meta.label + " · " + n + " row" + (n === 1 ? "" : "s"));
+        setStatus((isDemo() ? "Demo · " : "") + meta.label + " · " + n + " row" + (n === 1 ? "" : "s"));
       } catch (e) {
         state.items = [];
         renderTable();
@@ -678,8 +710,13 @@
     async function openEvent(id) {
       if (state.view === "publishes") {
         try {
-          const res = await api("/api/logs/publish-runs/" + encodeURIComponent(id));
-          const data = await res.json();
+          let data;
+          if (isDemo()) {
+            data = (window.AUDIT_DEMO.publishDetail || {})[id] || { run: state.items.find((r) => r.id === id)?._raw };
+          } else {
+            const res = await api("/api/logs/publish-runs/" + encodeURIComponent(id));
+            data = await res.json();
+          }
           showDetail({ id, _publish: true, _raw: data.run || data, who: "gitops", action: "publish", target: id, result: "allowed", time: "" });
         } catch (e) {
           setStatus(String(e.message || e), true);
@@ -687,9 +724,19 @@
         return;
       }
       try {
-        const res = await api("/api/audit/events/" + encodeURIComponent(id));
-        const data = await res.json();
-        const event = data.event || data;
+        let event;
+        if (isDemo()) {
+          event = ((window.AUDIT_DEMO.eventsById || {})[id] || {}).event;
+          if (!event) {
+            const row = state.items.find((r) => r.id === id);
+            if (row) return showDetail(row);
+            throw new Error("Event not found in demo set.");
+          }
+        } else {
+          const res = await api("/api/audit/events/" + encodeURIComponent(id));
+          const data = await res.json();
+          event = data.event || data;
+        }
         showDetail({
           id: event.id,
           time: event.time,
@@ -707,6 +754,23 @@
     }
 
     async function exportCsv() {
+      if (isDemo()) {
+        const rows = filteredRows();
+        const header = "id,time,who,action,target,result";
+        const lines = rows.map((r) =>
+          [r.id, r.time, r.who, r.action, r.target, r.result]
+            .map((x) => `"${String(x).replace(/"/g, '""')}"`)
+            .join(",")
+        );
+        const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "audit-demo-export.csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        setStatus("Demo export downloaded.");
+        return;
+      }
       setStatus("Exporting…");
       try {
         const res = await api("/api/audit/export", { format: "csv", limit: 2000 });
@@ -720,6 +784,13 @@
       } catch (e) {
         setStatus(String(e.message || e), true);
       }
+    }
+
+    function setDemo(on) {
+      const c = conn();
+      saveConn({ base: c.base, token: c.token, demo: !!on });
+      syncDemoChrome();
+      refreshAll();
     }
 
     function escapeHtml(s) {
@@ -758,10 +829,12 @@
       openEvent(tr.getAttribute("data-id"));
     });
 
+    document.getElementById("btnDemo").addEventListener("click", () => setDemo(!isDemo()));
     document.getElementById("btnSettings").addEventListener("click", () => {
       const c = conn();
       el.apiBase.value = c.base;
       el.apiToken.value = c.token;
+      el.useDemo.checked = c.demo;
       el.modal.classList.add("open");
       el.apiBase.focus();
     });
@@ -769,19 +842,26 @@
       el.modal.classList.remove("open");
     });
     document.getElementById("btnSaveSettings").addEventListener("click", () => {
-      saveConn({ base: el.apiBase.value.trim(), token: el.apiToken.value.trim() });
+      saveConn({
+        base: el.apiBase.value.trim(),
+        token: el.apiToken.value.trim(),
+        demo: el.useDemo.checked,
+      });
       el.modal.classList.remove("open");
+      syncDemoChrome();
       refreshAll();
     });
     el.modal.addEventListener("click", (ev) => {
       if (ev.target === el.modal) el.modal.classList.remove("open");
     });
 
-    // Boot
-    const c = conn();
-    if (!c.token) {
+    // Boot — demo on by default until Connection says otherwise
+    syncDemoChrome();
+    if (isDemo()) {
+      refreshAll();
+    } else if (!conn().token) {
       el.modal.classList.add("open");
-      setStatus("Add API connection to load live audit data.");
+      setStatus("Add API connection, or enable Demo for synthetic data.");
     } else {
       refreshAll();
     }
