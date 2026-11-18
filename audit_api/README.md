@@ -90,6 +90,8 @@ Put `AUDIT_API_TOKEN=...` in `/etc/prompt-vault/audit-api.env` (mode 600).
 
 ## Smoke
 
+Full VM deploy + curl checklist: [`VM_DEPLOY_AND_TEST.md`](./VM_DEPLOY_AND_TEST.md).
+
 ```bash
 curl -sS -H "Authorization: Bearer $AUDIT_API_TOKEN" \
   "http://127.0.0.1:8088/api/audit?limit=5" | jq .
