@@ -44,16 +44,28 @@
     .top {
       background: var(--navy);
       color: #fff;
-      padding: 0.9rem 1.5rem;
+      padding: 0.75rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 1rem;
+      flex-wrap: wrap;
     }
-    .brand { display: flex; align-items: baseline; gap: 0.65rem; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
     .brand strong { font-size: 1.05rem; letter-spacing: -0.02em; }
-    .brand span { color: rgba(255,255,255,0.75); font-weight: 500; }
     .sep { width: 1px; height: 1rem; background: rgba(255,255,255,0.25); }
+    .tabs { display: flex; gap: 0.35rem; }
+    .tab {
+      border: 1px solid transparent;
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .tab:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .tab.active { background: rgba(255,255,255,0.14); color: #fff; }
     .top-actions { display: flex; gap: 0.5rem; align-items: center; }
     .hint { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
 
@@ -78,6 +90,10 @@
       color: var(--ink);
     }
 
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* —— Prompt review —— */
     .layout {
       display: grid;
       grid-template-columns: minmax(240px, 320px) 1fr;
@@ -111,6 +127,7 @@
       flex-direction: column;
       gap: 0.35rem;
       flex: 1;
+      max-height: calc(100vh - 200px);
     }
     .agent-card {
       text-align: left;
@@ -156,9 +173,9 @@
       font-size: 0.72rem;
       font-weight: 600;
     }
-    .pill.live { background: var(--ok-soft); color: var(--ok); }
+    .pill.live, .pill.allowed, .pill.ok { background: var(--ok-soft); color: var(--ok); }
     .pill.deprecated { background: var(--warn-soft); color: var(--warn); }
-    .pill.destroyed, .pill.soft_deleted { background: var(--deny-soft); color: var(--deny); }
+    .pill.destroyed, .pill.soft_deleted, .pill.denied { background: var(--deny-soft); color: var(--deny); }
 
     .panel {
       background: var(--raised);
@@ -192,9 +209,24 @@
       background: #fafbfc;
     }
     tr:last-child td { border-bottom: 0; }
-    tbody tr { cursor: pointer; }
-    tbody tr:hover td { background: #f3fafa; }
+    tbody tr.clickable { cursor: pointer; }
+    tbody tr.clickable:hover td { background: #f3fafa; }
     tbody tr.selected td { background: var(--brand-soft); }
+    .mono { font-family: var(--mono); font-size: 0.8rem; }
+    .who-cell {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .target {
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
 
     .prompt-box {
       white-space: pre-wrap;
@@ -211,6 +243,61 @@
     }
     .status { font-size: 0.8rem; color: var(--ink-faint); margin-top: 0.5rem; }
     .status.err { color: var(--deny); }
+
+    /* —— Activity log —— */
+    .activity-wrap { padding: 1rem 1.5rem 2rem; }
+    .toolbar {
+      background: var(--raised);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: grid;
+      gap: 0.85rem;
+    }
+    .stats { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+    .stat strong { font-size: 1.2rem; letter-spacing: -0.02em; }
+    .stat span { font-size: 0.8rem; color: var(--ink-faint); margin-left: 0.35rem; }
+    .stat.ok strong { color: var(--ok); }
+    .stat.deny strong { color: var(--deny); }
+    .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .controls .search { width: auto; flex: 1 1 200px; max-width: 360px; }
+    .controls .select { width: auto; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .chip {
+      border: 1px solid var(--line);
+      background: var(--raised);
+      color: var(--ink-dim);
+      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .chip.active {
+      background: var(--brand-soft);
+      border-color: #b7d9dc;
+      color: var(--brand-deep);
+    }
+    .activity-main {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .activity-main.with-detail {
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+      gap: 1rem;
+    }
+    .detail-side {
+      background: var(--raised);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .detail-side h3 { margin: 0 0 0.75rem; font-size: 1rem; }
+    .detail-side dl { margin: 0; display: grid; gap: 0.65rem; }
+    .detail-side dt { font-size: 0.72rem; font-weight: 600; color: var(--ink-faint); }
+    .detail-side dd { margin: 0; font-size: 0.875rem; word-break: break-word; }
 
     .modal-backdrop {
       position: fixed; inset: 0;
@@ -235,7 +322,7 @@
 
     @media (max-width: 800px) {
       .layout { grid-template-columns: 1fr; }
-      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); max-height: 40vh; }
+      .activity-main.with-detail { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -244,86 +331,131 @@
     <div class="brand">
       <strong>XelerAIT</strong>
       <div class="sep"></div>
-      <span>Prompt review</span>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab active" data-page="review">Prompt review</button>
+        <button type="button" class="tab" data-page="activity">Activity log</button>
+      </div>
     </div>
     <div class="top-actions">
-      <span class="hint">Read-only · Keycloak later</span>
+      <span class="hint" id="modeHint">Read-only · identities as in vault</span>
+      <button type="button" class="btn btn-ghost" id="btnDemo">Demo</button>
       <button type="button" class="btn btn-ghost" id="btnSettings">Connection</button>
       <button type="button" class="btn" id="btnRefresh">Refresh</button>
     </div>
   </header>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <h2>Agents</h2>
-      <input class="search" id="search" type="search" placeholder="Search by name…" />
-      <select class="select" id="spaceFilter" aria-label="Space filter">
-        <option value="">All spaces</option>
-      </select>
-      <div class="agent-list" id="agentList"></div>
-      <div class="status" id="listStatus"></div>
-    </aside>
-
-    <main class="main" id="main">
-      <div class="empty-main" id="emptyState">Select an agent to review its versions and system prompt.</div>
-      <div id="detail" hidden>
-        <div class="title-row">
-          <div>
-            <h1 id="agentTitle">—</h1>
-            <p id="agentDesc"></p>
+  <!-- Prompt review -->
+  <div class="page active" id="page-review">
+    <div class="layout">
+      <aside class="sidebar">
+        <h2>Agents</h2>
+        <input class="search" id="search" type="search" placeholder="Search by name…" />
+        <select class="select" id="spaceFilter" aria-label="Space filter">
+          <option value="">All spaces</option>
+        </select>
+        <div class="agent-list" id="agentList"></div>
+        <div class="status" id="listStatus"></div>
+      </aside>
+      <main class="main">
+        <div class="empty-main" id="emptyState">Select an agent to review versions, system prompt, and changes.</div>
+        <div id="detail" hidden>
+          <div class="title-row">
+            <div>
+              <h1 id="agentTitle">—</h1>
+              <p id="agentDesc"></p>
+            </div>
+            <div id="agentBadges"></div>
           </div>
-          <div id="agentBadges"></div>
+          <section class="panel">
+            <h3>Versions</h3>
+            <div class="body" style="padding:0">
+              <table>
+                <thead><tr><th>Version</th><th>Status</th><th>When</th><th>Note</th></tr></thead>
+                <tbody id="versionBody"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="panel">
+            <h3 id="promptHeading">System prompt</h3>
+            <div class="body"><pre class="prompt-box" id="promptBox">Select a version.</pre></div>
+          </section>
+          <section class="panel">
+            <h3>Change history</h3>
+            <div class="body" style="padding:0">
+              <table>
+                <thead><tr><th>When</th><th>What happened</th><th>Version</th><th>Who</th></tr></thead>
+                <tbody id="changeBody"></tbody>
+              </table>
+            </div>
+          </section>
+          <div class="status" id="detailStatus"></div>
         </div>
+      </main>
+    </div>
+  </div>
 
-        <section class="panel">
-          <h3>Versions</h3>
-          <div class="body" style="padding:0">
-            <table>
-              <thead>
-                <tr>
-                  <th>Version</th>
-                  <th>Status</th>
-                  <th>When</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody id="versionBody"></tbody>
-            </table>
+  <!-- Activity log (previous capabilities) -->
+  <div class="page" id="page-activity">
+    <div class="activity-wrap">
+      <div class="toolbar">
+        <div class="stats">
+          <div class="stat"><strong id="statEvents">—</strong><span>events</span></div>
+          <div class="stat ok"><strong id="statAllowed">—</strong><span>allowed</span></div>
+          <div class="stat deny"><strong id="statDenied">—</strong><span>denied</span></div>
+        </div>
+        <div class="controls">
+          <input class="search" id="actSearch" type="search" placeholder="Search who, action, path…" />
+          <select class="select" id="actResult">
+            <option value="">All results</option>
+            <option value="allowed">Allowed</option>
+            <option value="denied">Denied</option>
+          </select>
+          <div class="chips" id="actViews">
+            <button type="button" class="chip active" data-view="activity">All activity</button>
+            <button type="button" class="chip" data-view="publishes">Publish runs</button>
+            <button type="button" class="chip" data-view="certs">Certificates</button>
+            <button type="button" class="chip" data-view="agents">Agent reads</button>
+            <button type="button" class="chip" data-view="admin">Human / admin</button>
+            <button type="button" class="chip" data-view="failures">Failures</button>
           </div>
-        </section>
-
-        <section class="panel">
-          <h3 id="promptHeading">System prompt</h3>
-          <div class="body">
-            <pre class="prompt-box" id="promptBox">Select a version.</pre>
-          </div>
-        </section>
-
-        <section class="panel">
-          <h3>Change history</h3>
-          <div class="body" style="padding:0">
-            <table>
-              <thead>
-                <tr>
-                  <th>When</th>
-                  <th>What happened</th>
-                  <th>Version</th>
-                  <th>Who</th>
-                </tr>
-              </thead>
-              <tbody id="changeBody"></tbody>
-            </table>
-          </div>
-        </section>
-        <div class="status" id="detailStatus"></div>
+          <button type="button" class="btn btn-light" id="btnExport">Export</button>
+        </div>
+        <div class="status" id="actStatus"></div>
       </div>
-    </main>
+      <div class="activity-main" id="actMain">
+        <div class="panel" style="margin:0">
+          <div class="body" style="padding:0; overflow:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Who</th>
+                  <th>Action</th>
+                  <th>Target</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody id="actBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="detail-side" id="actDetail" hidden>
+          <button type="button" class="btn btn-light" id="btnCloseActDetail" style="float:right;padding:0.2rem 0.5rem">Close</button>
+          <h3>Event</h3>
+          <dl id="actDetailBody"></dl>
+        </aside>
+      </div>
+    </div>
   </div>
 
   <div class="modal-backdrop" id="settingsModal">
     <div class="modal">
       <h3>Connection</h3>
-      <p>Point at the audit service. This screen only reads data — it cannot change prompts or call GitHub.</p>
+      <p>Read-only. “Who” shows the vault identity (email or display name) — roles come later with Keycloak.</p>
+      <div class="field" style="display:flex;align-items:center;gap:0.5rem">
+        <input id="useDemo" type="checkbox" checked />
+        <label for="useDemo" style="margin:0;font-weight:500">Use demo data</label>
+      </div>
       <div class="field">
         <label for="apiBase">Base URL</label>
         <input id="apiBase" placeholder="http://127.0.0.1:8088" />
@@ -339,15 +471,90 @@
     </div>
   </div>
 
+  <script src="./demo-data.js"></script>
   <script>
     const STORAGE_KEY = "xelerait.auditor.connection";
+    const ACT_VIEWS = {
+      activity: { path: "/api/audit/events", demoKey: "activity", label: "All activity" },
+      publishes: { path: "/api/logs/publish-runs", demoKey: "publishes", label: "Publish runs", publish: true },
+      certs: { path: "/api/logs/cert-renewals", demoKey: "certs", label: "Certificates" },
+      agents: { path: "/api/logs/agent-reads", demoKey: "agents", label: "Agent reads" },
+      admin: { path: "/api/logs/human-admin", demoKey: "admin", label: "Human / admin" },
+      failures: { path: "/api/logs/auth-failures", demoKey: "failures", label: "Failures" },
+    };
+
     const state = {
+      page: "review",
       agents: [],
       selected: null,
       versions: [],
-      selectedVersion: null,
+      actView: "activity",
+      actItems: [],
+      actSelectedId: null,
     };
 
+    function loadConn() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+      catch { return {}; }
+    }
+    function saveConn(c) { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
+    function conn() {
+      const c = loadConn();
+      return {
+        base: (c.base || "http://127.0.0.1:8088").replace(/\/$/, ""),
+        token: c.token || "local-demo-token",
+        demo: c.demo === undefined ? true : !!c.demo,
+      };
+    }
+    function isDemo() { return !!conn().demo; }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+    function fmtTime(iso) {
+      if (!iso) return "—";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return iso;
+      return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+    function statusPill(status) {
+      const s = status || "unknown";
+      return `<span class="pill ${escapeHtml(s)}">${escapeHtml(String(s).replace(/_/g, " "))}</span>`;
+    }
+    function syncDemoChrome() {
+      const on = isDemo();
+      document.getElementById("modeHint").textContent = on
+        ? "Demo data · who = vault identity (email / display name)"
+        : "Live API · who from OpenBao display_name";
+      const btn = document.getElementById("btnDemo");
+      btn.style.background = on ? "rgba(107,192,72,0.22)" : "";
+      btn.style.borderColor = on ? "rgba(107,192,72,0.55)" : "";
+    }
+
+    async function api(path, params) {
+      const { base, token } = conn();
+      const url = new URL(base + path);
+      if (params) Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
+      });
+      const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+      if (!res.ok) throw new Error(res.status + " " + (await res.text()).slice(0, 160));
+      return res.json();
+    }
+
+    /* —— Pages —— */
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        state.page = tab.dataset.page;
+        document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t === tab));
+        document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p.id === "page-" + state.page));
+        if (state.page === "activity") refreshActivity();
+      });
+    });
+
+    /* —— Prompt review —— */
     const el = {
       agentList: document.getElementById("agentList"),
       search: document.getElementById("search"),
@@ -363,70 +570,7 @@
       promptHeading: document.getElementById("promptHeading"),
       listStatus: document.getElementById("listStatus"),
       detailStatus: document.getElementById("detailStatus"),
-      modal: document.getElementById("settingsModal"),
-      apiBase: document.getElementById("apiBase"),
-      apiToken: document.getElementById("apiToken"),
     };
-
-    function conn() {
-      try {
-        const c = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-        return {
-          base: (c.base || "http://127.0.0.1:8088").replace(/\/$/, ""),
-          token: c.token || "local-demo-token",
-        };
-      } catch {
-        return { base: "http://127.0.0.1:8088", token: "local-demo-token" };
-      }
-    }
-
-    function setListStatus(msg, err) {
-      el.listStatus.textContent = msg || "";
-      el.listStatus.classList.toggle("err", !!err);
-    }
-    function setDetailStatus(msg, err) {
-      el.detailStatus.textContent = msg || "";
-      el.detailStatus.classList.toggle("err", !!err);
-    }
-
-    async function api(path, params) {
-      const { base, token } = conn();
-      const url = new URL(base + path);
-      if (params) {
-        Object.entries(params).forEach(([k, v]) => {
-          if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
-        });
-      }
-      const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(res.status + " " + (t.slice(0, 160) || res.statusText));
-      }
-      return res.json();
-    }
-
-    function escapeHtml(s) {
-      return String(s ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    function fmtTime(iso) {
-      if (!iso) return "—";
-      const d = new Date(iso);
-      if (Number.isNaN(d.getTime())) return iso;
-      return d.toLocaleString(undefined, {
-        month: "short", day: "numeric",
-        hour: "2-digit", minute: "2-digit",
-      });
-    }
-
-    function statusPill(status) {
-      const s = status || "unknown";
-      return `<span class="pill ${escapeHtml(s)}">${escapeHtml(s.replace("_", " "))}</span>`;
-    }
 
     function filteredAgents() {
       const q = el.search.value.trim().toLowerCase();
@@ -437,49 +581,43 @@
         return `${a.display_name} ${a.agent} ${a.space}`.toLowerCase().includes(q);
       });
     }
-
     function renderAgentList() {
       const rows = filteredAgents();
-      if (!rows.length) {
-        el.agentList.innerHTML = `<div class="meta" style="padding:0.5rem;color:var(--ink-faint)">No agents match.</div>`;
-        return;
-      }
-      el.agentList.innerHTML = rows.map((a) => {
+      el.agentList.innerHTML = rows.length ? rows.map((a) => {
         const active = state.selected && state.selected.space === a.space && state.selected.agent === a.agent;
         const ver = a.current_version != null ? `v${a.current_version}` : "no live version";
-        const retired = a.soft_deleted ? " · retired" : "";
-        return `
-          <button type="button" class="agent-card ${active ? "active" : ""}"
-            data-space="${escapeHtml(a.space)}" data-agent="${escapeHtml(a.agent)}">
-            <div class="name">${escapeHtml(a.display_name)}</div>
-            <div class="meta">${escapeHtml(a.space)} · ${escapeHtml(ver)}${retired}</div>
-          </button>`;
-      }).join("");
+        return `<button type="button" class="agent-card ${active ? "active" : ""}" data-space="${escapeHtml(a.space)}" data-agent="${escapeHtml(a.agent)}">
+          <div class="name">${escapeHtml(a.display_name)}</div>
+          <div class="meta">${escapeHtml(a.space)} · ${escapeHtml(ver)}${a.soft_deleted ? " · retired" : ""}</div>
+        </button>`;
+      }).join("") : `<div style="color:var(--ink-faint);padding:0.5rem">No agents match.</div>`;
     }
 
     async function loadAgents() {
-      setListStatus("Loading agents…");
+      el.listStatus.textContent = "Loading…";
       try {
         const [spaces, agents] = await Promise.all([
           api("/api/auditor/spaces"),
           api("/api/auditor/agents"),
         ]);
         state.agents = agents.items || [];
-        const current = el.spaceFilter.value;
+        const cur = el.spaceFilter.value;
         el.spaceFilter.innerHTML = `<option value="">All spaces</option>` +
           (spaces.items || []).map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
-        el.spaceFilter.value = current;
+        el.spaceFilter.value = cur;
         renderAgentList();
-        setListStatus(`${state.agents.length} agents · read-only`);
+        el.listStatus.textContent = `${state.agents.length} agents · read-only`;
+        el.listStatus.classList.remove("err");
       } catch (e) {
         state.agents = [];
         renderAgentList();
-        setListStatus(String(e.message || e), true);
+        el.listStatus.textContent = String(e.message || e);
+        el.listStatus.classList.add("err");
       }
     }
 
     async function selectAgent(space, agent) {
-      setDetailStatus("Loading…");
+      el.detailStatus.textContent = "Loading…";
       try {
         const [info, versions, changes] = await Promise.all([
           api(`/api/auditor/agents/${encodeURIComponent(space)}/${encodeURIComponent(agent)}`),
@@ -494,10 +632,10 @@
         el.agentDesc.textContent = info.agent.description || `${info.agent.space} / ${info.agent.agent}`;
         el.agentBadges.innerHTML = info.agent.soft_deleted
           ? statusPill("soft_deleted")
-          : (info.agent.current_version != null ? statusPill("live") + ` <span class="hint" style="color:var(--ink-faint)">v${info.agent.current_version}</span>` : "");
+          : (info.agent.current_version != null ? statusPill("live") : "");
 
         el.versionBody.innerHTML = state.versions.map((v) => `
-          <tr data-version="${v.version}" class="">
+          <tr class="clickable" data-version="${v.version}">
             <td><strong>v${v.version}</strong>${v.is_current ? " · current" : ""}</td>
             <td>${statusPill(v.status)}</td>
             <td>${escapeHtml(fmtTime(v.deprecated_at || v.destroyed_at || v.soft_deleted_at || v.created_at))}</td>
@@ -509,8 +647,8 @@
             <td>${escapeHtml(fmtTime(c.at))}</td>
             <td>${escapeHtml(c.summary || c.action)}</td>
             <td>${c.version != null ? "v" + c.version : "—"}</td>
-            <td>${escapeHtml(c.who)}</td>
-          </tr>`).join("") || `<tr><td colspan="4">No changes recorded.</td></tr>`;
+            <td class="who-cell" title="${escapeHtml(c.who)}">${escapeHtml(c.who)}</td>
+          </tr>`).join("") || `<tr><td colspan="4">No changes.</td></tr>`;
 
         renderAgentList();
         const prefer = state.versions.find((v) => v.is_current) || state.versions[0];
@@ -519,9 +657,11 @@
           el.promptBox.textContent = "No prompt available.";
           el.promptHeading.textContent = "System prompt";
         }
-        setDetailStatus("");
+        el.detailStatus.textContent = "";
+        el.detailStatus.classList.remove("err");
       } catch (e) {
-        setDetailStatus(String(e.message || e), true);
+        el.detailStatus.textContent = String(e.message || e);
+        el.detailStatus.classList.add("err");
       }
     }
 
@@ -536,7 +676,6 @@
           `/api/auditor/agents/${encodeURIComponent(space)}/${encodeURIComponent(agent)}/prompt`,
           { version }
         );
-        state.selectedVersion = version;
         if (!data.system_prompt || data.system_prompt.text == null) {
           el.promptBox.textContent = data.unavailable_reason || "Prompt text is not available for this version.";
           return;
@@ -549,39 +688,240 @@
 
     el.agentList.addEventListener("click", (ev) => {
       const btn = ev.target.closest(".agent-card");
-      if (!btn) return;
-      selectAgent(btn.dataset.space, btn.dataset.agent);
+      if (btn) selectAgent(btn.dataset.space, btn.dataset.agent);
     });
     el.versionBody.addEventListener("click", (ev) => {
       const tr = ev.target.closest("tr[data-version]");
-      if (!tr || !state.selected) return;
-      loadPrompt(state.selected.space, state.selected.agent, Number(tr.dataset.version));
+      if (tr && state.selected) loadPrompt(state.selected.space, state.selected.agent, Number(tr.dataset.version));
     });
     el.search.addEventListener("input", renderAgentList);
     el.spaceFilter.addEventListener("change", renderAgentList);
-    document.getElementById("btnRefresh").addEventListener("click", async () => {
-      await loadAgents();
-      if (state.selected) await selectAgent(state.selected.space, state.selected.agent);
-    });
-    document.getElementById("btnSettings").addEventListener("click", () => {
-      const c = conn();
-      el.apiBase.value = c.base;
-      el.apiToken.value = c.token;
-      el.modal.classList.add("open");
-    });
-    document.getElementById("btnCancelSettings").addEventListener("click", () => el.modal.classList.remove("open"));
-    document.getElementById("btnSaveSettings").addEventListener("click", () => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        base: el.apiBase.value.trim(),
-        token: el.apiToken.value.trim(),
+
+    /* —— Activity log —— */
+    function setActStatus(msg, err) {
+      const n = document.getElementById("actStatus");
+      n.textContent = msg || "";
+      n.classList.toggle("err", !!err);
+    }
+
+    function normalizeAct(view, data) {
+      if (view === "publishes") {
+        return (data.items || []).map((r) => ({
+          id: r.run_id,
+          time: r.started_at || r.ended_at || "",
+          who: r.actor || "gitops-pipeline",
+          action: "publish",
+          target: (r.agents || []).join(", ") || r.run_id,
+          result: "allowed",
+          _raw: r,
+          _publish: true,
+        }));
+      }
+      return (data.items || data.entries || []).map((e) => ({
+        id: e.id,
+        time: e.time,
+        who: e.who || "unknown",
+        action: e.action || e.category || "—",
+        target: e.target || "—",
+        result: e.result || "—",
+        _raw: e,
       }));
-      el.modal.classList.remove("open");
-      loadAgents();
+    }
+
+    function filteredAct() {
+      const q = document.getElementById("actSearch").value.trim().toLowerCase();
+      const result = document.getElementById("actResult").value;
+      return state.actItems.filter((r) => {
+        if (result && r.result !== result) return false;
+        if (!q) return true;
+        return `${r.who} ${r.action} ${r.target} ${r.id}`.toLowerCase().includes(q);
+      });
+    }
+
+    function renderActTable() {
+      const rows = filteredAct();
+      const body = document.getElementById("actBody");
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--ink-faint);padding:1.5rem">No events match.</td></tr>`;
+        return;
+      }
+      body.innerHTML = rows.map((r) => `
+        <tr class="clickable ${r.id === state.actSelectedId ? "selected" : ""}" data-id="${escapeHtml(r.id)}">
+          <td class="mono">${escapeHtml(fmtTime(r.time))}</td>
+          <td class="who-cell" title="${escapeHtml(r.who)}">${escapeHtml(r.who)}</td>
+          <td>${escapeHtml(r.action)}</td>
+          <td class="target" title="${escapeHtml(r.target)}">${escapeHtml(r.target)}</td>
+          <td>${statusPill(r.result)}</td>
+        </tr>`).join("");
+    }
+
+    async function loadActSummary() {
+      try {
+        let t;
+        if (isDemo()) t = (window.AUDIT_ACTIVITY_DEMO?.summary?.totals) || {};
+        else t = (await api("/api/audit/summary")).totals || {};
+        document.getElementById("statEvents").textContent = t.events ?? "—";
+        document.getElementById("statAllowed").textContent = t.allowed ?? "—";
+        document.getElementById("statDenied").textContent = t.denied ?? "—";
+      } catch {
+        document.getElementById("statEvents").textContent = "—";
+        document.getElementById("statAllowed").textContent = "—";
+        document.getElementById("statDenied").textContent = "—";
+      }
+    }
+
+    async function loadActView() {
+      const meta = ACT_VIEWS[state.actView];
+      setActStatus("Loading…");
+      try {
+        let data;
+        if (isDemo()) {
+          if (!window.AUDIT_ACTIVITY_DEMO) throw new Error("Activity demo data missing");
+          data = window.AUDIT_ACTIVITY_DEMO[meta.demoKey] || { items: [] };
+        } else {
+          data = await api(meta.path, { limit: 100 });
+        }
+        state.actItems = normalizeAct(state.actView, data);
+        state.actSelectedId = null;
+        document.getElementById("actDetail").hidden = true;
+        document.getElementById("actMain").classList.remove("with-detail");
+        renderActTable();
+        setActStatus(`${isDemo() ? "Demo · " : ""}${meta.label} · ${filteredAct().length} rows · who = vault identity`);
+      } catch (e) {
+        state.actItems = [];
+        renderActTable();
+        setActStatus(String(e.message || e), true);
+      }
+    }
+
+    async function refreshActivity() {
+      await Promise.all([loadActSummary(), loadActView()]);
+    }
+
+    async function openActEvent(id) {
+      const row = state.actItems.find((r) => r.id === id);
+      if (!row) return;
+      state.actSelectedId = id;
+      renderActTable();
+      const box = document.getElementById("actDetail");
+      const dl = document.getElementById("actDetailBody");
+      document.getElementById("actMain").classList.add("with-detail");
+      box.hidden = false;
+      const raw = row._raw || row;
+      let fields;
+      if (row._publish) {
+        fields = [
+          ["Run ID", raw.run_id],
+          ["Who", raw.actor],
+          ["Started", fmtTime(raw.started_at)],
+          ["Ended", fmtTime(raw.ended_at)],
+          ["Agents", (raw.agents || []).join(", ")],
+        ];
+      } else {
+        fields = [
+          ["Time", fmtTime(raw.time)],
+          ["Who", raw.who],
+          ["Action", raw.action],
+          ["Category", raw.category],
+          ["Target", raw.target],
+          ["Space", raw.space],
+          ["Agent", raw.agent],
+          ["Result", raw.result],
+          ["Request ID", raw.request_id],
+        ];
+      }
+      let html = fields.map(([k, v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v ?? "—")}</dd></div>`).join("");
+      if (raw.error) html += `<div><dt>Error</dt><dd class="mono">${escapeHtml(raw.error)}</dd></div>`;
+      dl.innerHTML = html;
+    }
+
+    document.getElementById("actBody").addEventListener("click", (ev) => {
+      const tr = ev.target.closest("tr[data-id]");
+      if (tr) openActEvent(tr.dataset.id);
     });
-    el.modal.addEventListener("click", (ev) => {
-      if (ev.target === el.modal) el.modal.classList.remove("open");
+    document.getElementById("btnCloseActDetail").addEventListener("click", () => {
+      document.getElementById("actDetail").hidden = true;
+      document.getElementById("actMain").classList.remove("with-detail");
+      state.actSelectedId = null;
+      renderActTable();
+    });
+    document.getElementById("actSearch").addEventListener("input", renderActTable);
+    document.getElementById("actResult").addEventListener("change", () => {
+      if (!isDemo() && state.actView === "activity") loadActView();
+      else renderActTable();
+    });
+    document.querySelectorAll("#actViews .chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        document.querySelectorAll("#actViews .chip").forEach((c) => c.classList.toggle("active", c === chip));
+        state.actView = chip.dataset.view;
+        loadActView();
+      });
+    });
+    document.getElementById("btnExport").addEventListener("click", async () => {
+      if (isDemo()) {
+        const rows = filteredAct();
+        const header = "id,time,who,action,target,result";
+        const lines = rows.map((r) => [r.id, r.time, r.who, r.action, r.target, r.result]
+          .map((x) => `"${String(x).replace(/"/g, '""')}"`).join(","));
+        const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "activity-demo.csv";
+        a.click();
+        return;
+      }
+      try {
+        const { base, token } = conn();
+        const res = await fetch(base + "/api/audit/export?format=csv&limit=2000", {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (!res.ok) throw new Error("Export failed");
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "audit-export.csv";
+        a.click();
+      } catch (e) {
+        setActStatus(String(e.message || e), true);
+      }
     });
 
+    /* —— Shared chrome —— */
+    document.getElementById("btnDemo").addEventListener("click", () => {
+      const c = conn();
+      saveConn({ ...c, demo: !c.demo });
+      syncDemoChrome();
+      refreshAll();
+    });
+    document.getElementById("btnRefresh").addEventListener("click", refreshAll);
+    document.getElementById("btnSettings").addEventListener("click", () => {
+      const c = conn();
+      document.getElementById("apiBase").value = c.base;
+      document.getElementById("apiToken").value = c.token;
+      document.getElementById("useDemo").checked = c.demo;
+      document.getElementById("settingsModal").classList.add("open");
+    });
+    document.getElementById("btnCancelSettings").addEventListener("click", () => {
+      document.getElementById("settingsModal").classList.remove("open");
+    });
+    document.getElementById("btnSaveSettings").addEventListener("click", () => {
+      saveConn({
+        base: document.getElementById("apiBase").value.trim(),
+        token: document.getElementById("apiToken").value.trim(),
+        demo: document.getElementById("useDemo").checked,
+      });
+      document.getElementById("settingsModal").classList.remove("open");
+      syncDemoChrome();
+      refreshAll();
+    });
+
+    async function refreshAll() {
+      await loadAgents();
+      if (state.selected) await selectAgent(state.selected.space, state.selected.agent);
+      if (state.page === "activity") await refreshActivity();
+    }
+
+    syncDemoChrome();
     loadAgents();
   </script>
 </body>

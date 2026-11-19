@@ -23,7 +23,8 @@ _AGENTS: list[dict[str, Any]] = [
             "12": {
                 "status": "live",
                 "created_at": _iso(1),
-                "created_by": "ci-publish",
+                # OpenBao-style identities (email or display_name) — no RBAC roles yet
+                "created_by": "gitops-pipeline",
                 "note": "Current live version",
                 "system_prompt": {
                     "text": (
@@ -38,7 +39,7 @@ _AGENTS: list[dict[str, Any]] = [
                 "status": "deprecated",
                 "created_at": _iso(48),
                 "deprecated_at": _iso(1.1),
-                "deprecated_by": "ci-publish",
+                "deprecated_by": "gitops-pipeline",
                 "note": "Superseded by version 12",
                 "system_prompt": {
                     "text": (
@@ -51,7 +52,7 @@ _AGENTS: list[dict[str, Any]] = [
                 "status": "destroyed",
                 "created_at": _iso(400),
                 "destroyed_at": _iso(24),
-                "destroyed_by": "vault-admin",
+                "destroyed_by": "vault.admin@xelerait.com",
                 "note": "Removed after retention window",
                 "system_prompt": None,
             },
@@ -60,7 +61,7 @@ _AGENTS: list[dict[str, Any]] = [
             {
                 "id": "chg-1",
                 "at": _iso(1),
-                "who": "ci-publish",
+                "who": "gitops-pipeline",
                 "action": "published",
                 "version": 12,
                 "summary": "Published version 12 and set it live",
@@ -68,7 +69,7 @@ _AGENTS: list[dict[str, Any]] = [
             {
                 "id": "chg-2",
                 "at": _iso(1.05),
-                "who": "ci-publish",
+                "who": "gitops-pipeline",
                 "action": "deprecated",
                 "version": 11,
                 "summary": "Deprecated version 11 (replaced by 12)",
@@ -76,7 +77,7 @@ _AGENTS: list[dict[str, Any]] = [
             {
                 "id": "chg-3",
                 "at": _iso(24),
-                "who": "vault-admin",
+                "who": "vault.admin@xelerait.com",
                 "action": "destroyed",
                 "version": 8,
                 "summary": "Destroyed old version 8",
@@ -93,7 +94,7 @@ _AGENTS: list[dict[str, Any]] = [
             "3": {
                 "status": "live",
                 "created_at": _iso(5),
-                "created_by": "ci-publish",
+                "created_by": "gitops-pipeline",
                 "note": "Current live version",
                 "system_prompt": {
                     "text": (
@@ -107,7 +108,7 @@ _AGENTS: list[dict[str, Any]] = [
                 "status": "deprecated",
                 "created_at": _iso(120),
                 "deprecated_at": _iso(5.1),
-                "deprecated_by": "ci-publish",
+                "deprecated_by": "gitops-pipeline",
                 "note": "Superseded by version 3",
                 "system_prompt": {
                     "text": "You draft discharge summaries. (Version 2 — deprecated.)"
@@ -118,7 +119,7 @@ _AGENTS: list[dict[str, Any]] = [
             {
                 "id": "chg-d1",
                 "at": _iso(5),
-                "who": "ci-publish",
+                "who": "gitops-pipeline",
                 "action": "published",
                 "version": 3,
                 "summary": "Published version 3",
@@ -126,7 +127,7 @@ _AGENTS: list[dict[str, Any]] = [
             {
                 "id": "chg-d2",
                 "at": _iso(5.1),
-                "who": "ci-publish",
+                "who": "gitops-pipeline",
                 "action": "deprecated",
                 "version": 2,
                 "summary": "Deprecated version 2",
@@ -143,7 +144,7 @@ _AGENTS: list[dict[str, Any]] = [
             "7": {
                 "status": "live",
                 "created_at": _iso(10),
-                "created_by": "ci-publish",
+                "created_by": "gitops-pipeline",
                 "system_prompt": {
                     "text": (
                         "You help hospital billing staff check claim narratives for completeness.\n"
@@ -155,7 +156,7 @@ _AGENTS: list[dict[str, Any]] = [
                 "status": "deprecated",
                 "created_at": _iso(200),
                 "deprecated_at": _iso(10.2),
-                "deprecated_by": "release-manager",
+                "deprecated_by": "release.manager@xelerait.com",
                 "system_prompt": {
                     "text": "Claims helper v6 (deprecated)."
                 },
@@ -165,7 +166,7 @@ _AGENTS: list[dict[str, Any]] = [
             {
                 "id": "chg-c1",
                 "at": _iso(10),
-                "who": "ci-publish",
+                "who": "gitops-pipeline",
                 "action": "published",
                 "version": 7,
                 "summary": "Published version 7",
@@ -173,7 +174,7 @@ _AGENTS: list[dict[str, Any]] = [
             {
                 "id": "chg-c2",
                 "at": _iso(10.2),
-                "who": "release-manager",
+                "who": "release.manager@xelerait.com",
                 "action": "deprecated",
                 "version": 6,
                 "summary": "Deprecated version 6",
@@ -192,7 +193,7 @@ _AGENTS: list[dict[str, Any]] = [
                 "status": "soft_deleted",
                 "created_at": _iso(800),
                 "soft_deleted_at": _iso(30),
-                "soft_deleted_by": "space-owner",
+                "soft_deleted_by": "space.owner@hospital.example",
                 "system_prompt": {
                     "text": "Retired scribe agent. Do not use."
                 },
@@ -202,7 +203,7 @@ _AGENTS: list[dict[str, Any]] = [
             {
                 "id": "chg-s1",
                 "at": _iso(30),
-                "who": "space-owner",
+                "who": "space.owner@hospital.example",
                 "action": "soft_deleted",
                 "version": 1,
                 "summary": "Agent soft-deleted (kill switch)",

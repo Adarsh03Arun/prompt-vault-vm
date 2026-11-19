@@ -9,7 +9,10 @@ Auth (same as other audit routes):
 Authorization: Bearer <AUDIT_API_TOKEN>
 ```
 
-UI: `GET /ui/` (Prompt review screen).
+UI: `GET /ui/` — **Prompt review** (agents / versions / prompt text / changes) plus **Activity log**
+(publish runs, certificates, agent reads, human/admin, failures).  
+
+**Who:** no RBAC roles yet — show OpenBao `display_name` (often email or cert CN like `….agents.internal`).
 
 ## Endpoints
 
