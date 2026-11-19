@@ -471,9 +471,25 @@
     </div>
   </div>
 
-  <script src="./demo-data.js"></script>
+  <script src="/ui/demo-data.js"></script>
   <script>
     const STORAGE_KEY = "xelerait.auditor.connection";
+    let _activityDemoPromise = null;
+    function ensureActivityDemo() {
+      if (window.AUDIT_ACTIVITY_DEMO) return Promise.resolve(window.AUDIT_ACTIVITY_DEMO);
+      if (_activityDemoPromise) return _activityDemoPromise;
+      _activityDemoPromise = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "/ui/demo-data.js?v=" + Date.now();
+        s.onload = () => {
+          if (window.AUDIT_ACTIVITY_DEMO) resolve(window.AUDIT_ACTIVITY_DEMO);
+          else reject(new Error("Activity demo data missing"));
+        };
+        s.onerror = () => reject(new Error("Activity demo data missing (failed to load /ui/demo-data.js)"));
+        document.head.appendChild(s);
+      });
+      return _activityDemoPromise;
+    }
     const ACT_VIEWS = {
       activity: { path: "/api/audit/events", demoKey: "activity", label: "All activity" },
       publishes: { path: "/api/logs/publish-runs", demoKey: "publishes", label: "Publish runs", publish: true },
@@ -758,7 +774,7 @@
     async function loadActSummary() {
       try {
         let t;
-        if (isDemo()) t = (window.AUDIT_ACTIVITY_DEMO?.summary?.totals) || {};
+        if (isDemo()) t = ((await ensureActivityDemo()).summary?.totals) || {};
         else t = (await api("/api/audit/summary")).totals || {};
         document.getElementById("statEvents").textContent = t.events ?? "—";
         document.getElementById("statAllowed").textContent = t.allowed ?? "—";
@@ -776,8 +792,8 @@
       try {
         let data;
         if (isDemo()) {
-          if (!window.AUDIT_ACTIVITY_DEMO) throw new Error("Activity demo data missing");
-          data = window.AUDIT_ACTIVITY_DEMO[meta.demoKey] || { items: [] };
+          const demo = await ensureActivityDemo();
+          data = demo[meta.demoKey] || { items: [] };
         } else {
           data = await api(meta.path, { limit: 100 });
         }
