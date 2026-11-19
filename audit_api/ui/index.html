@@ -502,7 +502,7 @@
       const c = loadConn();
       return {
         base: (c.base || "http://127.0.0.1:8088").replace(/\/$/, ""),
-        token: c.token || "local-demo-token",
+        token: c.token || "test-token",
         demo: c.demo === undefined ? true : !!c.demo,
       };
     }

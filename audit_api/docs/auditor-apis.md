@@ -35,7 +35,7 @@ UI: `GET /ui/` — **Prompt review** (agents / versions / prompt text / changes)
 
 ```bash
 export BASE=http://127.0.0.1:8088
-export AUDIT_API_TOKEN=local-demo-token
+export AUDIT_API_TOKEN=test-token
 H=(-H "Authorization: Bearer $AUDIT_API_TOKEN")
 
 curl -sS "${H[@]}" "$BASE/api/auditor/agents" | jq .
