@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>XelerAIT — Audit</title>
+  <title>XelerAIT — Prompt review</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -13,27 +13,23 @@
       --brand: #137077;
       --brand-deep: #0f5c62;
       --brand-soft: #e6f3f4;
-      --accent: #6bc048;
       --paper: #f8fafb;
       --raised: #ffffff;
       --ink: #111827;
       --ink-dim: #4b5563;
       --ink-faint: #6b7280;
       --line: #e5e7eb;
-      --line-strong: #d1d5db;
       --ok: #2f6e3f;
       --ok-soft: #e3efe3;
+      --warn: #b5742a;
+      --warn-soft: #f7efe4;
       --deny: #9a3b35;
       --deny-soft: #f6e4e2;
-      --amber: #b5742a;
-      --radius: 8px;
       --sans: "Inter", "Segoe UI", system-ui, sans-serif;
       --mono: "IBM Plex Mono", ui-monospace, monospace;
       --shadow: 0 1px 2px rgba(10, 25, 33, 0.04), 0 8px 24px rgba(10, 25, 33, 0.06);
     }
-
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
     body {
       margin: 0;
       font-family: var(--sans);
@@ -41,54 +37,26 @@
       background: var(--paper);
       -webkit-font-smoothing: antialiased;
     }
-
     button, input, select { font: inherit; }
     button { cursor: pointer; }
     :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
-    .shell {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto auto 1fr;
-    }
-
-    /* Top bar */
     .top {
       background: var(--navy);
       color: #fff;
-      padding: 0.85rem 1.5rem;
+      padding: 0.9rem 1.5rem;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 1rem;
     }
-    .brand {
-      display: flex;
-      align-items: baseline;
-      gap: 0.65rem;
-      min-width: 0;
-    }
-    .brand-name {
-      font-weight: 700;
-      font-size: 1.05rem;
-      letter-spacing: -0.02em;
-    }
-    .brand-sep {
-      width: 1px;
-      height: 1rem;
-      background: rgba(255,255,255,0.25);
-    }
-    .brand-screen {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: rgba(255,255,255,0.78);
-    }
-    .top-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
+    .brand { display: flex; align-items: baseline; gap: 0.65rem; }
+    .brand strong { font-size: 1.05rem; letter-spacing: -0.02em; }
+    .brand span { color: rgba(255,255,255,0.75); font-weight: 500; }
+    .sep { width: 1px; height: 1rem; background: rgba(255,255,255,0.25); }
+    .top-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .hint { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+
     .btn {
       border: 1px solid transparent;
       border-radius: 6px;
@@ -99,439 +67,350 @@
       color: #fff;
     }
     .btn:hover { background: var(--brand-deep); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-ghost {
       background: transparent;
       border-color: rgba(255,255,255,0.22);
-      color: rgba(255,255,255,0.9);
+      color: #fff;
     }
-    .btn-ghost:hover { background: rgba(255,255,255,0.08); }
     .btn-light {
       background: var(--raised);
-      border-color: var(--line);
+      border: 1px solid var(--line);
       color: var(--ink);
     }
-    .btn-light:hover { border-color: var(--brand); color: var(--brand-deep); }
 
-    /* Summary + filters */
-    .toolbar {
-      background: var(--raised);
-      border-bottom: 1px solid var(--line);
-      padding: 1rem 1.5rem 1.1rem;
+    .layout {
       display: grid;
-      gap: 0.9rem;
+      grid-template-columns: minmax(240px, 320px) 1fr;
+      min-height: calc(100vh - 56px);
     }
-    .stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem 1.5rem;
-      align-items: baseline;
-    }
-    .stat {
-      display: flex;
-      align-items: baseline;
-      gap: 0.4rem;
-    }
-    .stat strong {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums;
-    }
-    .stat span {
-      font-size: 0.8rem;
-      color: var(--ink-faint);
-    }
-    .stat.ok strong { color: var(--ok); }
-    .stat.deny strong { color: var(--deny); }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.55rem;
-      align-items: center;
-    }
-    .search {
-      flex: 1 1 220px;
-      min-width: 180px;
-      max-width: 420px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      background: var(--paper);
-    }
-    .search:focus {
-      outline: none;
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px var(--brand-soft);
-    }
-    .select {
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 0.48rem 0.65rem;
+    .sidebar {
+      border-right: 1px solid var(--line);
       background: var(--raised);
-      color: var(--ink);
-    }
-    .views {
+      padding: 1rem;
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-      margin-left: auto;
-    }
-    .chip {
-      border: 1px solid var(--line);
-      background: var(--raised);
-      color: var(--ink-dim);
-      border-radius: 999px;
-      padding: 0.35rem 0.75rem;
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-    .chip:hover { border-color: var(--brand); color: var(--brand-deep); }
-    .chip.active {
-      background: var(--brand-soft);
-      border-color: #b7d9dc;
-      color: var(--brand-deep);
-    }
-
-    .status-line {
-      font-size: 0.8rem;
-      color: var(--ink-faint);
-      min-height: 1.2em;
-    }
-    .status-line.err { color: var(--deny); }
-
-    /* Main */
-    .main {
-      display: grid;
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      gap: 0.75rem;
       min-height: 0;
     }
-    .main.with-detail {
-      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-    }
-
-    .table-wrap {
-      overflow: auto;
-      padding: 0 1.5rem 1.5rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--raised);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-    th, td {
-      text-align: left;
-      padding: 0.7rem 0.85rem;
-      border-bottom: 1px solid var(--line);
-      font-size: 0.875rem;
-      vertical-align: top;
-    }
-    th {
-      background: #f3f6f7;
-      color: var(--ink-dim);
+    .sidebar h2 {
+      margin: 0;
+      font-size: 0.8rem;
       font-weight: 600;
-      font-size: 0.75rem;
-      letter-spacing: 0.02em;
-      position: sticky;
-      top: 0;
-      z-index: 1;
+      color: var(--ink-faint);
     }
-    tr:last-child td { border-bottom: 0; }
-    tbody tr { cursor: pointer; }
-    tbody tr:hover td { background: #f3fafa; }
-    tbody tr.selected td { background: var(--brand-soft); }
-    .mono { font-family: var(--mono); font-size: 0.8rem; }
-    .muted { color: var(--ink-faint); }
-    .who { font-weight: 500; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .target { max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 0.78rem; }
+    .search, .select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.5rem 0.7rem;
+      background: var(--paper);
+    }
+    .agent-list {
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+    }
+    .agent-card {
+      text-align: left;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: 8px;
+      padding: 0.7rem 0.8rem;
+      color: inherit;
+    }
+    .agent-card:hover { border-color: var(--brand); }
+    .agent-card.active {
+      background: var(--brand-soft);
+      border-color: #b7d9dc;
+    }
+    .agent-card .name { font-weight: 600; font-size: 0.92rem; }
+    .agent-card .meta { font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.2rem; }
+
+    .main { padding: 1.25rem 1.5rem 2rem; min-width: 0; }
+    .empty-main {
+      color: var(--ink-faint);
+      padding: 3rem 1rem;
+      text-align: center;
+    }
+    .title-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .title-row h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+    .title-row p { margin: 0.25rem 0 0; color: var(--ink-dim); font-size: 0.9rem; }
 
     .pill {
       display: inline-flex;
-      align-items: center;
       border-radius: 999px;
       padding: 0.15rem 0.55rem;
       font-size: 0.72rem;
       font-weight: 600;
     }
-    .pill.ok { background: var(--ok-soft); color: var(--ok); }
-    .pill.deny { background: var(--deny-soft); color: var(--deny); }
+    .pill.live { background: var(--ok-soft); color: var(--ok); }
+    .pill.deprecated { background: var(--warn-soft); color: var(--warn); }
+    .pill.destroyed, .pill.soft_deleted { background: var(--deny-soft); color: var(--deny); }
 
-    .empty {
-      text-align: center;
-      padding: 2.5rem 1rem;
-      color: var(--ink-faint);
-    }
-
-    /* Detail panel */
-    .detail {
-      border-left: 1px solid var(--line);
+    .panel {
       background: var(--raised);
-      padding: 1.1rem 1.2rem 1.5rem;
-      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+      overflow: hidden;
     }
-    .detail h2 {
-      margin: 0 0 0.25rem;
-      font-size: 1rem;
-    }
-    .detail .close {
-      float: right;
-      border: 0;
-      background: transparent;
-      color: var(--ink-faint);
-      font-size: 1.25rem;
-      line-height: 1;
-      padding: 0 0.2rem;
-    }
-    .detail dl {
-      margin: 1rem 0 0;
-      display: grid;
-      gap: 0.75rem;
-    }
-    .detail dt {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--ink-faint);
-      margin-bottom: 0.15rem;
-    }
-    .detail dd {
+    .panel h3 {
       margin: 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--line);
+      background: #f3f6f7;
+    }
+    .panel .body { padding: 0.85rem 1rem; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--line);
       font-size: 0.875rem;
-      word-break: break-word;
+      vertical-align: top;
     }
-    .detail pre {
-      margin: 0;
-      padding: 0.65rem 0.75rem;
+    th {
+      font-size: 0.75rem;
+      color: var(--ink-dim);
+      font-weight: 600;
+      background: #fafbfc;
+    }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover td { background: #f3fafa; }
+    tbody tr.selected td { background: var(--brand-soft); }
+
+    .prompt-box {
+      white-space: pre-wrap;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.5;
       background: var(--paper);
       border: 1px solid var(--line);
-      border-radius: 6px;
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      white-space: pre-wrap;
-      max-height: 220px;
-      overflow: auto;
-    }
-
-    /* Settings modal */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 25, 33, 0.45);
-      display: none;
-      align-items: center;
-      justify-content: center;
+      border-radius: 8px;
       padding: 1rem;
-      z-index: 20;
+      max-height: 420px;
+      overflow: auto;
+      margin: 0;
+    }
+    .status { font-size: 0.8rem; color: var(--ink-faint); margin-top: 0.5rem; }
+    .status.err { color: var(--deny); }
+
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(10, 25, 33, 0.45);
+      display: none; align-items: center; justify-content: center;
+      padding: 1rem; z-index: 20;
     }
     .modal-backdrop.open { display: flex; }
     .modal {
-      width: min(440px, 100%);
-      background: var(--raised);
+      width: min(420px, 100%);
+      background: #fff;
       border-radius: 10px;
+      padding: 1.25rem;
       box-shadow: var(--shadow);
-      padding: 1.25rem 1.35rem;
     }
-    .modal h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+    .modal h3 { margin: 0 0 0.35rem; }
     .modal p { margin: 0 0 1rem; color: var(--ink-dim); font-size: 0.875rem; }
     .field { display: grid; gap: 0.35rem; margin-bottom: 0.85rem; }
     .field label { font-size: 0.8rem; font-weight: 600; color: var(--ink-dim); }
-    .field input {
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 0.55rem 0.7rem;
-    }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem; }
+    .field input { border: 1px solid var(--line); border-radius: 6px; padding: 0.55rem 0.7rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
 
-    .auth-note {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.55);
-      margin-right: 0.35rem;
-    }
-
-    @media (max-width: 860px) {
-      .main.with-detail { grid-template-columns: 1fr; }
-      .detail {
-        border-left: 0;
-        border-top: 1px solid var(--line);
-        max-height: 45vh;
-      }
-      .views { margin-left: 0; width: 100%; }
-      .who, .target { max-width: 120px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; }
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); max-height: 40vh; }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <header class="top">
-      <div class="brand">
-        <div class="brand-name">XelerAIT</div>
-        <div class="brand-sep" aria-hidden="true"></div>
-        <div class="brand-screen">POD &amp; version audit</div>
-      </div>
-      <div class="top-actions">
-        <span class="auth-note" id="authNote">Demo data · Keycloak later</span>
-        <button type="button" class="btn btn-ghost" id="btnDemo" title="Toggle synthetic data">Demo</button>
-        <button type="button" class="btn btn-ghost" id="btnSettings">Connection</button>
-        <button type="button" class="btn" id="btnRefresh">Refresh</button>
-      </div>
-    </header>
-
-    <section class="toolbar">
-      <div class="stats" id="stats" aria-live="polite">
-        <div class="stat"><strong id="statEvents">—</strong><span>events</span></div>
-        <div class="stat ok"><strong id="statAllowed">—</strong><span>allowed</span></div>
-        <div class="stat deny"><strong id="statDenied">—</strong><span>denied</span></div>
-      </div>
-      <div class="controls">
-        <input class="search" id="search" type="search" placeholder="Search agent, change, version…" autocomplete="off" />
-        <select class="select" id="resultFilter" aria-label="Result filter">
-          <option value="">All results</option>
-          <option value="allowed">Allowed</option>
-          <option value="denied">Denied</option>
-        </select>
-        <div class="views" role="tablist" aria-label="Audit views">
-          <button type="button" class="chip active" data-view="pod" role="tab" aria-selected="true">POD changes</button>
-          <button type="button" class="chip" data-view="versions" role="tab">Versions</button>
-          <button type="button" class="chip" data-view="deprecations" role="tab">Deprecations</button>
-          <button type="button" class="chip" data-view="publishes" role="tab">Publish runs</button>
-          <button type="button" class="chip" data-view="failures" role="tab">Blocked</button>
-          <button type="button" class="chip" data-view="activity" role="tab">All</button>
-        </div>
-        <button type="button" class="btn btn-light" id="btnExport">Export</button>
-      </div>
-      <div class="status-line" id="status"></div>
-    </section>
-
-    <div class="main" id="main">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Agent</th>
-              <th>Change</th>
-              <th>Ver</th>
-              <th>Who</th>
-              <th>Result</th>
-            </tr>
-          </thead>
-          <tbody id="tbody">
-            <tr><td class="empty" colspan="6">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <aside class="detail" id="detail" hidden>
-        <button type="button" class="close" id="btnCloseDetail" aria-label="Close detail">×</button>
-        <h2>Event</h2>
-        <p class="muted" id="detailId" style="margin:0;font-size:0.8rem"></p>
-        <dl id="detailBody"></dl>
-      </aside>
+  <header class="top">
+    <div class="brand">
+      <strong>XelerAIT</strong>
+      <div class="sep"></div>
+      <span>Prompt review</span>
     </div>
+    <div class="top-actions">
+      <span class="hint">Read-only · Keycloak later</span>
+      <button type="button" class="btn btn-ghost" id="btnSettings">Connection</button>
+      <button type="button" class="btn" id="btnRefresh">Refresh</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>Agents</h2>
+      <input class="search" id="search" type="search" placeholder="Search by name…" />
+      <select class="select" id="spaceFilter" aria-label="Space filter">
+        <option value="">All spaces</option>
+      </select>
+      <div class="agent-list" id="agentList"></div>
+      <div class="status" id="listStatus"></div>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="empty-main" id="emptyState">Select an agent to review its versions and system prompt.</div>
+      <div id="detail" hidden>
+        <div class="title-row">
+          <div>
+            <h1 id="agentTitle">—</h1>
+            <p id="agentDesc"></p>
+          </div>
+          <div id="agentBadges"></div>
+        </div>
+
+        <section class="panel">
+          <h3>Versions</h3>
+          <div class="body" style="padding:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Version</th>
+                  <th>Status</th>
+                  <th>When</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody id="versionBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3 id="promptHeading">System prompt</h3>
+          <div class="body">
+            <pre class="prompt-box" id="promptBox">Select a version.</pre>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>Change history</h3>
+          <div class="body" style="padding:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>What happened</th>
+                  <th>Version</th>
+                  <th>Who</th>
+                </tr>
+              </thead>
+              <tbody id="changeBody"></tbody>
+            </table>
+          </div>
+        </section>
+        <div class="status" id="detailStatus"></div>
+      </div>
+    </main>
   </div>
 
-  <div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="modal-backdrop" id="settingsModal">
     <div class="modal">
-      <h3 id="settingsTitle">API connection</h3>
-      <p>Use demo data to preview the UI, or point at the live audit service. Keycloak replaces the token later.</p>
-      <div class="field" style="display:flex;align-items:center;gap:0.5rem">
-        <input id="useDemo" type="checkbox" checked />
-        <label for="useDemo" style="margin:0;font-weight:500">Use synthetic demo data</label>
-      </div>
+      <h3>Connection</h3>
+      <p>Point at the audit service. This screen only reads data — it cannot change prompts or call GitHub.</p>
       <div class="field">
         <label for="apiBase">Base URL</label>
         <input id="apiBase" placeholder="http://127.0.0.1:8088" />
       </div>
       <div class="field">
-        <label for="apiToken">Bearer token</label>
+        <label for="apiToken">Access token</label>
         <input id="apiToken" type="password" placeholder="AUDIT_API_TOKEN" autocomplete="off" />
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-light" id="btnCancelSettings">Cancel</button>
-        <button type="button" class="btn" id="btnSaveSettings">Save &amp; load</button>
+        <button type="button" class="btn" id="btnSaveSettings">Save</button>
       </div>
     </div>
   </div>
 
-  <script src="./demo-data.js"></script>
   <script>
-    const STORAGE_KEY = "xelerait.audit.connection";
-    const VIEWS = {
-      pod: { path: "/api/audit/events", label: "POD changes", demoKey: "pod", liveParams: { space: "pod" } },
-      versions: { path: "/api/audit/events", label: "Versions", demoKey: "versions", liveParams: { space: "pod", path_prefix: "secret/data/prompts/tch/pod" } },
-      deprecations: { path: "/api/audit/events", label: "Deprecations", demoKey: "deprecations", liveParams: { space: "pod", result: "denied" } },
-      publishes: { path: "/api/logs/publish-runs", label: "Publish runs", listOnly: true, demoKey: "publishes" },
-      failures: { path: "/api/logs/auth-failures", label: "Blocked", demoKey: "failures" },
-      activity: { path: "/api/audit/events", label: "All", demoKey: "activity" },
-    };
-
+    const STORAGE_KEY = "xelerait.auditor.connection";
     const state = {
-      view: "pod",
-      items: [],
-      selectedId: null,
-      detail: null,
+      agents: [],
+      selected: null,
+      versions: [],
+      selectedVersion: null,
     };
 
     const el = {
-      tbody: document.getElementById("tbody"),
-      status: document.getElementById("status"),
+      agentList: document.getElementById("agentList"),
       search: document.getElementById("search"),
-      resultFilter: document.getElementById("resultFilter"),
-      main: document.getElementById("main"),
+      spaceFilter: document.getElementById("spaceFilter"),
+      emptyState: document.getElementById("emptyState"),
       detail: document.getElementById("detail"),
-      detailId: document.getElementById("detailId"),
-      detailBody: document.getElementById("detailBody"),
+      agentTitle: document.getElementById("agentTitle"),
+      agentDesc: document.getElementById("agentDesc"),
+      agentBadges: document.getElementById("agentBadges"),
+      versionBody: document.getElementById("versionBody"),
+      changeBody: document.getElementById("changeBody"),
+      promptBox: document.getElementById("promptBox"),
+      promptHeading: document.getElementById("promptHeading"),
+      listStatus: document.getElementById("listStatus"),
+      detailStatus: document.getElementById("detailStatus"),
       modal: document.getElementById("settingsModal"),
       apiBase: document.getElementById("apiBase"),
       apiToken: document.getElementById("apiToken"),
-      useDemo: document.getElementById("useDemo"),
-      authNote: document.getElementById("authNote"),
-      btnDemo: document.getElementById("btnDemo"),
-      statEvents: document.getElementById("statEvents"),
-      statAllowed: document.getElementById("statAllowed"),
-      statDenied: document.getElementById("statDenied"),
     };
 
-    function loadConn() {
+    function conn() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        const c = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        return {
+          base: (c.base || "http://127.0.0.1:8088").replace(/\/$/, ""),
+          token: c.token || "local-demo-token",
+        };
       } catch {
-        return {};
+        return { base: "http://127.0.0.1:8088", token: "local-demo-token" };
       }
     }
-    function saveConn(conn) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(conn));
+
+    function setListStatus(msg, err) {
+      el.listStatus.textContent = msg || "";
+      el.listStatus.classList.toggle("err", !!err);
     }
-    function conn() {
-      const c = loadConn();
-      const demoDefault = c.demo === undefined ? true : !!c.demo;
-      return {
-        base: (c.base || "http://127.0.0.1:8088").replace(/\/$/, ""),
-        token: c.token || "",
-        demo: demoDefault,
-      };
-    }
-    function isDemo() {
-      return !!conn().demo;
-    }
-    function syncDemoChrome() {
-      const on = isDemo();
-      el.authNote.textContent = on ? "Synthetic demo data" : "Live API · Keycloak later";
-      el.btnDemo.classList.toggle("active", on);
-      el.btnDemo.style.background = on ? "rgba(107,192,72,0.22)" : "";
-      el.btnDemo.style.borderColor = on ? "rgba(107,192,72,0.55)" : "";
+    function setDetailStatus(msg, err) {
+      el.detailStatus.textContent = msg || "";
+      el.detailStatus.classList.toggle("err", !!err);
     }
 
-    function setStatus(msg, isErr) {
-      el.status.textContent = msg || "";
-      el.status.classList.toggle("err", !!isErr);
+    async function api(path, params) {
+      const { base, token } = conn();
+      const url = new URL(base + path);
+      if (params) {
+        Object.entries(params).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
+        });
+      }
+      const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(res.status + " " + (t.slice(0, 160) || res.statusText));
+      }
+      return res.json();
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
 
     function fmtTime(iso) {
@@ -539,356 +418,171 @@
       const d = new Date(iso);
       if (Number.isNaN(d.getTime())) return iso;
       return d.toLocaleString(undefined, {
-        month: "short", day: "2-digit",
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
+        month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit",
       });
     }
 
-    async function api(path, params) {
-      const { base, token } = conn();
-      if (!token) throw new Error("Set a bearer token in Connection first.");
-      const url = new URL(base + path);
-      if (params) {
-        Object.entries(params).forEach(([k, v]) => {
-          if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
-        });
-      }
-      const res = await fetch(url, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(res.status + " " + (text.slice(0, 180) || res.statusText));
-      }
-      return res;
+    function statusPill(status) {
+      const s = status || "unknown";
+      return `<span class="pill ${escapeHtml(s)}">${escapeHtml(s.replace("_", " "))}</span>`;
     }
 
-    async function loadSummary() {
-      try {
-        let t;
-        if (isDemo()) {
-          t = (window.AUDIT_DEMO && window.AUDIT_DEMO.summary.totals) || {};
-        } else {
-          const res = await api("/api/audit/summary");
-          const data = await res.json();
-          t = data.totals || {};
-        }
-        el.statEvents.textContent = t.events ?? "—";
-        el.statAllowed.textContent = t.allowed ?? "—";
-        el.statDenied.textContent = t.denied ?? "—";
-      } catch (e) {
-        el.statEvents.textContent = "—";
-        el.statAllowed.textContent = "—";
-        el.statDenied.textContent = "—";
-      }
-    }
-
-    function changeLabel(e) {
-      if (e.change) return e.change;
-      if (e.category === "version.publish") return "Published version";
-      if (e.category === "version.deprecate") return "Deprecated version";
-      if (e.category === "version.destroy") return "Destroyed version";
-      if (e.category === "version.rollback") return "Rolled back";
-      if (e.category === "version.status") return "Status / live pointer";
-      if (e.category === "agent.soft_delete") return "Soft-deleted agent";
-      if (e.category === "prompt.read") return e.result === "denied" ? "Read blocked" : "Prompt read";
-      return e.action || e.category || "—";
-    }
-
-    function normalizeItems(view, data) {
-      if (view === "publishes") {
-        return (data.items || []).map((r) => ({
-          id: r.run_id,
-          time: r.started_at || r.ended_at || "",
-          who: r.actor || "gitops",
-          agent: (r.agents || []).join(", ") || "—",
-          action: "publish",
-          change: r.summary || ("Publish " + ((r.agents || []).join(", ") || "run")),
-          version: "—",
-          target: (r.agents || []).join(", ") || "publish run",
-          result: "allowed",
-          _raw: r,
-          _publish: true,
-        }));
-      }
-      return (data.items || data.entries || []).map((e) => ({
-        id: e.id,
-        time: e.time,
-        who: e.who || "unknown",
-        agent: e.agent && e.agent !== "—" ? e.agent : (e.target || "").split("/").pop() || "—",
-        action: e.action || e.category || "—",
-        change: changeLabel(e),
-        version: e.version != null ? "v" + e.version : "—",
-        target: e.target || "—",
-        result: e.result || "—",
-        _raw: e,
-      }));
-    }
-
-    function filteredRows() {
+    function filteredAgents() {
       const q = el.search.value.trim().toLowerCase();
-      const result = el.resultFilter.value;
-      return state.items.filter((row) => {
-        if (result && row.result !== result) return false;
+      const space = el.spaceFilter.value;
+      return state.agents.filter((a) => {
+        if (space && a.space !== space) return false;
         if (!q) return true;
-        const blob = [row.who, row.agent, row.change, row.action, row.target, row.version, row.id].join(" ").toLowerCase();
-        return blob.includes(q);
+        return `${a.display_name} ${a.agent} ${a.space}`.toLowerCase().includes(q);
       });
     }
 
-    function renderTable() {
-      const rows = filteredRows();
+    function renderAgentList() {
+      const rows = filteredAgents();
       if (!rows.length) {
-        el.tbody.innerHTML = `<tr><td class="empty" colspan="6">No POD / version events match this view or filter.</td></tr>`;
+        el.agentList.innerHTML = `<div class="meta" style="padding:0.5rem;color:var(--ink-faint)">No agents match.</div>`;
         return;
       }
-      el.tbody.innerHTML = rows.map((r) => `
-        <tr data-id="${escapeAttr(r.id)}" class="${r.id === state.selectedId ? "selected" : ""}">
-          <td class="mono muted">${escapeHtml(fmtTime(r.time))}</td>
-          <td class="who" title="${escapeAttr(r.agent)}">${escapeHtml(r.agent)}</td>
-          <td title="${escapeAttr(r.change)}">${escapeHtml(r.change)}</td>
-          <td class="mono">${escapeHtml(r.version)}</td>
-          <td class="muted" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeAttr(r.who)}">${escapeHtml(r.who)}</td>
-          <td><span class="pill ${r.result === "denied" ? "deny" : "ok"}">${escapeHtml(r.result)}</span></td>
-        </tr>
-      `).join("");
+      el.agentList.innerHTML = rows.map((a) => {
+        const active = state.selected && state.selected.space === a.space && state.selected.agent === a.agent;
+        const ver = a.current_version != null ? `v${a.current_version}` : "no live version";
+        const retired = a.soft_deleted ? " · retired" : "";
+        return `
+          <button type="button" class="agent-card ${active ? "active" : ""}"
+            data-space="${escapeHtml(a.space)}" data-agent="${escapeHtml(a.agent)}">
+            <div class="name">${escapeHtml(a.display_name)}</div>
+            <div class="meta">${escapeHtml(a.space)} · ${escapeHtml(ver)}${retired}</div>
+          </button>`;
+      }).join("");
     }
 
-    function showDetail(row) {
-      state.selectedId = row.id;
-      el.main.classList.add("with-detail");
-      el.detail.hidden = false;
-      el.detailId.textContent = row.id || "";
-      const raw = row._raw || row;
-      const fields = row._publish
-        ? [
-            ["Run ID", raw.run_id],
-            ["Space", raw.space || "pod"],
-            ["Summary", raw.summary || "—"],
-            ["Started", fmtTime(raw.started_at)],
-            ["Ended", fmtTime(raw.ended_at)],
-            ["Actor", raw.actor],
-            ["Agents", (raw.agents || []).join(", ") || "—"],
-            ["Event count", String(raw.event_count ?? "—")],
-          ]
-        : [
-            ["Time", fmtTime(raw.time)],
-            ["Space", raw.space || "—"],
-            ["Agent", raw.agent || "—"],
-            ["Change", raw.change || changeLabel(raw)],
-            ["Version", raw.version != null ? "v" + raw.version : "—"],
-            ["Who", raw.who || "—"],
-            ["Action", raw.action || "—"],
-            ["Category", raw.category || "—"],
-            ["Target", raw.target || "—"],
-            ["Result", raw.result || "—"],
-            ["Request ID", raw.request_id || "—"],
-          ];
-      let html = fields.map(([k, v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(String(v ?? "—"))}</dd></div>`).join("");
-      if (raw.error) {
-        html += `<div><dt>Error</dt><dd><pre>${escapeHtml(raw.error)}</pre></dd></div>`;
-      }
-      el.detailBody.innerHTML = html;
-      renderTable();
-    }
-
-    function hideDetail() {
-      state.selectedId = null;
-      state.detail = null;
-      el.detail.hidden = true;
-      el.main.classList.remove("with-detail");
-      renderTable();
-    }
-
-    async function loadView() {
-      const meta = VIEWS[state.view];
-      setStatus("Loading " + meta.label.toLowerCase() + "…");
+    async function loadAgents() {
+      setListStatus("Loading agents…");
       try {
-        let data;
-        if (isDemo()) {
-          if (!window.AUDIT_DEMO) throw new Error("Demo data failed to load.");
-          data = window.AUDIT_DEMO[meta.demoKey] || { items: [] };
-        } else {
-          const params = { limit: 100, ...(meta.liveParams || {}) };
-          const result = el.resultFilter.value;
-          if (result) params.result = result;
-          const res = await api(meta.path, params);
-          data = await res.json();
-        }
-        state.items = normalizeItems(state.view, data);
-        hideDetail();
-        renderTable();
-        const n = filteredRows().length;
-        setStatus((isDemo() ? "Demo · " : "") + meta.label + " · " + n + " row" + (n === 1 ? "" : "s"));
+        const [spaces, agents] = await Promise.all([
+          api("/api/auditor/spaces"),
+          api("/api/auditor/agents"),
+        ]);
+        state.agents = agents.items || [];
+        const current = el.spaceFilter.value;
+        el.spaceFilter.innerHTML = `<option value="">All spaces</option>` +
+          (spaces.items || []).map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+        el.spaceFilter.value = current;
+        renderAgentList();
+        setListStatus(`${state.agents.length} agents · read-only`);
       } catch (e) {
-        state.items = [];
-        renderTable();
-        setStatus(String(e.message || e), true);
+        state.agents = [];
+        renderAgentList();
+        setListStatus(String(e.message || e), true);
       }
     }
 
-    async function refreshAll() {
-      await Promise.all([loadSummary(), loadView()]);
-    }
-
-    async function openEvent(id) {
-      if (state.view === "publishes") {
-        try {
-          let data;
-          if (isDemo()) {
-            data = (window.AUDIT_DEMO.publishDetail || {})[id] || { run: state.items.find((r) => r.id === id)?._raw };
-          } else {
-            const res = await api("/api/logs/publish-runs/" + encodeURIComponent(id));
-            data = await res.json();
-          }
-          showDetail({ id, _publish: true, _raw: data.run || data, who: "gitops", action: "publish", target: id, result: "allowed", time: "" });
-        } catch (e) {
-          setStatus(String(e.message || e), true);
-        }
-        return;
-      }
+    async function selectAgent(space, agent) {
+      setDetailStatus("Loading…");
       try {
-        let event;
-        if (isDemo()) {
-          event = ((window.AUDIT_DEMO.eventsById || {})[id] || {}).event;
-          if (!event) {
-            const row = state.items.find((r) => r.id === id);
-            if (row) return showDetail(row);
-            throw new Error("Event not found in demo set.");
-          }
-        } else {
-          const res = await api("/api/audit/events/" + encodeURIComponent(id));
-          const data = await res.json();
-          event = data.event || data;
+        const [info, versions, changes] = await Promise.all([
+          api(`/api/auditor/agents/${encodeURIComponent(space)}/${encodeURIComponent(agent)}`),
+          api(`/api/auditor/agents/${encodeURIComponent(space)}/${encodeURIComponent(agent)}/versions`),
+          api(`/api/auditor/agents/${encodeURIComponent(space)}/${encodeURIComponent(agent)}/changes`),
+        ]);
+        state.selected = info.agent;
+        state.versions = versions.items || [];
+        el.emptyState.hidden = true;
+        el.detail.hidden = false;
+        el.agentTitle.textContent = info.agent.display_name;
+        el.agentDesc.textContent = info.agent.description || `${info.agent.space} / ${info.agent.agent}`;
+        el.agentBadges.innerHTML = info.agent.soft_deleted
+          ? statusPill("soft_deleted")
+          : (info.agent.current_version != null ? statusPill("live") + ` <span class="hint" style="color:var(--ink-faint)">v${info.agent.current_version}</span>` : "");
+
+        el.versionBody.innerHTML = state.versions.map((v) => `
+          <tr data-version="${v.version}" class="">
+            <td><strong>v${v.version}</strong>${v.is_current ? " · current" : ""}</td>
+            <td>${statusPill(v.status)}</td>
+            <td>${escapeHtml(fmtTime(v.deprecated_at || v.destroyed_at || v.soft_deleted_at || v.created_at))}</td>
+            <td>${escapeHtml(v.note || "—")}</td>
+          </tr>`).join("") || `<tr><td colspan="4">No versions.</td></tr>`;
+
+        el.changeBody.innerHTML = (changes.items || []).map((c) => `
+          <tr>
+            <td>${escapeHtml(fmtTime(c.at))}</td>
+            <td>${escapeHtml(c.summary || c.action)}</td>
+            <td>${c.version != null ? "v" + c.version : "—"}</td>
+            <td>${escapeHtml(c.who)}</td>
+          </tr>`).join("") || `<tr><td colspan="4">No changes recorded.</td></tr>`;
+
+        renderAgentList();
+        const prefer = state.versions.find((v) => v.is_current) || state.versions[0];
+        if (prefer) await loadPrompt(space, agent, prefer.version);
+        else {
+          el.promptBox.textContent = "No prompt available.";
+          el.promptHeading.textContent = "System prompt";
         }
-        showDetail({
-          id: event.id,
-          time: event.time,
-          who: event.who,
-          action: event.action,
-          target: event.target,
-          result: event.result,
-          _raw: event,
-        });
+        setDetailStatus("");
       } catch (e) {
-        const row = state.items.find((r) => r.id === id);
-        if (row) showDetail(row);
-        else setStatus(String(e.message || e), true);
+        setDetailStatus(String(e.message || e), true);
       }
     }
 
-    async function exportCsv() {
-      if (isDemo()) {
-        const rows = filteredRows();
-        const header = "id,time,who,action,target,result";
-        const lines = rows.map((r) =>
-          [r.id, r.time, r.who, r.action, r.target, r.result]
-            .map((x) => `"${String(x).replace(/"/g, '""')}"`)
-            .join(",")
-        );
-        const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "audit-demo-export.csv";
-        a.click();
-        URL.revokeObjectURL(a.href);
-        setStatus("Demo export downloaded.");
-        return;
-      }
-      setStatus("Exporting…");
-      try {
-        const res = await api("/api/audit/export", { format: "csv", limit: 2000 });
-        const blob = await res.blob();
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "audit-export.csv";
-        a.click();
-        URL.revokeObjectURL(a.href);
-        setStatus("Export downloaded.");
-      } catch (e) {
-        setStatus(String(e.message || e), true);
-      }
-    }
-
-    function setDemo(on) {
-      const c = conn();
-      saveConn({ base: c.base, token: c.token, demo: !!on });
-      syncDemoChrome();
-      refreshAll();
-    }
-
-    function escapeHtml(s) {
-      return String(s)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-    function escapeAttr(s) { return escapeHtml(s).replace(/'/g, "&#39;"); }
-
-    // Events
-    document.getElementById("btnRefresh").addEventListener("click", refreshAll);
-    document.getElementById("btnExport").addEventListener("click", exportCsv);
-    document.getElementById("btnCloseDetail").addEventListener("click", hideDetail);
-    el.search.addEventListener("input", renderTable);
-    el.resultFilter.addEventListener("change", () => {
-      if (state.view === "activity") loadView();
-      else renderTable();
-    });
-
-    document.querySelectorAll(".chip[data-view]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".chip[data-view]").forEach((b) => {
-          b.classList.toggle("active", b === btn);
-          b.setAttribute("aria-selected", b === btn ? "true" : "false");
-        });
-        state.view = btn.dataset.view;
-        loadView();
+    async function loadPrompt(space, agent, version) {
+      el.promptHeading.textContent = `System prompt · v${version}`;
+      el.promptBox.textContent = "Loading…";
+      document.querySelectorAll("#versionBody tr").forEach((tr) => {
+        tr.classList.toggle("selected", tr.getAttribute("data-version") === String(version));
       });
-    });
+      try {
+        const data = await api(
+          `/api/auditor/agents/${encodeURIComponent(space)}/${encodeURIComponent(agent)}/prompt`,
+          { version }
+        );
+        state.selectedVersion = version;
+        if (!data.system_prompt || data.system_prompt.text == null) {
+          el.promptBox.textContent = data.unavailable_reason || "Prompt text is not available for this version.";
+          return;
+        }
+        el.promptBox.textContent = data.system_prompt.text;
+      } catch (e) {
+        el.promptBox.textContent = String(e.message || e);
+      }
+    }
 
-    el.tbody.addEventListener("click", (ev) => {
-      const tr = ev.target.closest("tr[data-id]");
-      if (!tr) return;
-      openEvent(tr.getAttribute("data-id"));
+    el.agentList.addEventListener("click", (ev) => {
+      const btn = ev.target.closest(".agent-card");
+      if (!btn) return;
+      selectAgent(btn.dataset.space, btn.dataset.agent);
     });
-
-    document.getElementById("btnDemo").addEventListener("click", () => setDemo(!isDemo()));
+    el.versionBody.addEventListener("click", (ev) => {
+      const tr = ev.target.closest("tr[data-version]");
+      if (!tr || !state.selected) return;
+      loadPrompt(state.selected.space, state.selected.agent, Number(tr.dataset.version));
+    });
+    el.search.addEventListener("input", renderAgentList);
+    el.spaceFilter.addEventListener("change", renderAgentList);
+    document.getElementById("btnRefresh").addEventListener("click", async () => {
+      await loadAgents();
+      if (state.selected) await selectAgent(state.selected.space, state.selected.agent);
+    });
     document.getElementById("btnSettings").addEventListener("click", () => {
       const c = conn();
       el.apiBase.value = c.base;
       el.apiToken.value = c.token;
-      el.useDemo.checked = c.demo;
       el.modal.classList.add("open");
-      el.apiBase.focus();
     });
-    document.getElementById("btnCancelSettings").addEventListener("click", () => {
-      el.modal.classList.remove("open");
-    });
+    document.getElementById("btnCancelSettings").addEventListener("click", () => el.modal.classList.remove("open"));
     document.getElementById("btnSaveSettings").addEventListener("click", () => {
-      saveConn({
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
         base: el.apiBase.value.trim(),
         token: el.apiToken.value.trim(),
-        demo: el.useDemo.checked,
-      });
+      }));
       el.modal.classList.remove("open");
-      syncDemoChrome();
-      refreshAll();
+      loadAgents();
     });
     el.modal.addEventListener("click", (ev) => {
       if (ev.target === el.modal) el.modal.classList.remove("open");
     });
 
-    // Boot — demo on by default until Connection says otherwise
-    syncDemoChrome();
-    if (isDemo()) {
-      refreshAll();
-    } else if (!conn().token) {
-      el.modal.classList.add("open");
-      setStatus("Add API connection, or enable Demo for synthetic data.");
-    } else {
-      refreshAll();
-    }
+    loadAgents();
   </script>
 </body>
 </html>

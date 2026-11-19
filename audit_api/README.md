@@ -92,7 +92,8 @@ Put `AUDIT_API_TOKEN=...` in `/etc/prompt-vault/audit-api.env` (mode 600).
 
 Full VM deploy + curl checklist: [`VM_DEPLOY_AND_TEST.md`](./VM_DEPLOY_AND_TEST.md).
 
-**Audit UI (shared, no roles yet):** open `http://127.0.0.1:8088/ui/` while the service is running. Set Base URL + bearer token under **Connection**. Keycloak comes later.
+**Prompt review UI (auditor, read-only):** `http://127.0.0.1:8088/ui/` — pick an agent, see versions / deprecations, read `system_prompt.text`.  
+APIs: [`docs/auditor-apis.md`](./docs/auditor-apis.md). Keycloak later. No writes to OpenBao or GitHub.
 
 ```bash
 curl -sS -H "Authorization: Bearer $AUDIT_API_TOKEN" \

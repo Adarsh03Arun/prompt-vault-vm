@@ -485,6 +485,70 @@ def auth_failures(
     return {"items": [e.to_dict() for e in page], "next_cursor": next_cursor}
 
 
+# ---------------------------------------------------------------------------
+# Auditor review APIs (read-only) — agents, versions, prompt text, changes
+# Demo catalogue by default. No writes to OpenBao or GitHub.
+# ---------------------------------------------------------------------------
+
+from . import auditor_demo as _auditor
+
+
+@app.get("/api/auditor/spaces")
+def auditor_spaces(_auth: None = Auth) -> dict:
+    """List spaces that have agents (demo catalogue)."""
+    return {"items": _auditor.list_spaces()}
+
+
+@app.get("/api/auditor/agents")
+def auditor_agents(
+    _auth: None = Auth,
+    space: str | None = Query(None, description="Filter by space"),
+    q: str | None = Query(None, description="Search display name or agent id"),
+) -> dict:
+    """List agents an auditor can review (read-only)."""
+    return {"items": _auditor.list_agents(space=space, q=q)}
+
+
+@app.get("/api/auditor/agents/{space}/{agent}")
+def auditor_agent(_auth: None = Auth, space: str = "", agent: str = "") -> dict:
+    row = _auditor.get_agent(space, agent)
+    if not row:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    return {"agent": row}
+
+
+@app.get("/api/auditor/agents/{space}/{agent}/versions")
+def auditor_versions(_auth: None = Auth, space: str = "", agent: str = "") -> dict:
+    """Version list with live / deprecated / destroyed / soft_deleted status."""
+    rows = _auditor.list_versions(space, agent)
+    if rows is None:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    return {"space": space, "agent": agent, "items": rows}
+
+
+@app.get("/api/auditor/agents/{space}/{agent}/prompt")
+def auditor_prompt(
+    _auth: None = Auth,
+    space: str = "",
+    agent: str = "",
+    version: int | None = Query(None, description="Omit for current live version"),
+) -> dict:
+    """Return system_prompt.text for a version (auditor read). Destroyed versions have no text."""
+    row = _auditor.get_prompt(space, agent, version)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Agent or version not found")
+    return row
+
+
+@app.get("/api/auditor/agents/{space}/{agent}/changes")
+def auditor_changes(_auth: None = Auth, space: str = "", agent: str = "") -> dict:
+    """Publish / deprecate / destroy / soft-delete history for one agent."""
+    rows = _auditor.list_changes(space, agent)
+    if rows is None:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    return {"space": space, "agent": agent, "items": rows}
+
+
 @app.exception_handler(HTTPException)
 async def http_exc_handler(_request: Request, exc: HTTPException):
     return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
